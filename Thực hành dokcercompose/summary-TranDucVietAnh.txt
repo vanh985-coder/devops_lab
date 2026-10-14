@@ -1,0 +1,25 @@
+Hostname sever:dal0244
+Tên source code: san_thuong_mai_devops_course
+Công nghệ của source: java-17, sql sever
+Tên image đã build: image app
+Tên service trong docker-compose: 
++ app: chạy app
++ db: nơi lưu trữ db
++ db_init: nơi khởi tạo db
+
+port container:
+app : 8096:8080
+db: db:1433
+
+1. Em đã dùng Dockerfile như thế nào?
+- Em đã dùng Dockerfile để tạo image app rồi đưa nó vào service của docker-compose.yml
+2. Em đã dùng Docker Compose như thế nào?
+- Em đã dùng docker-compose.yml để đóng gói 3 service vào để chạy một lượt tạo ra các container khác nhau trong một dòng lệnh docker compose up -d --build
+3. Nếu hệ thống chưa chạy được ngay từ đầu, lỗi nằm ở đâu?
+- Lỗi của em lần đầu app chạy xong bị tắt luôn vì không có db nên em phải thêm db_init để khởi tạo db xong rồi app mới chạy vì vậy lên trong service app có phần depends on db
+- Lỗi thứ 2 là em hay dùng dấu cách lệch dòng
+4. Nếu hệ thống chưa chạy được ngay từ đầu, lỗi nằm ở đâu?
+- Lỗi cách dòng
+- lỗi chưa thêm phần depends on vì có những dịch vụ phụ thuộc vào dịch vụ khác
+5. Nếu mở rộng tiếp, em sẽ thêm database / nginx / env / volume ra sao?
+- Nếu có dịch vụ đó sẵn thì em thêm tên vào service + image còn nếu không em sẽ viết dockerfile cho nó và đưa vào docker-compose.yml

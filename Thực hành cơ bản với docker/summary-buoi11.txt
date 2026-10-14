@@ -1,0 +1,19 @@
+TỔNG KẾT KỸ THUẬT - BUỔI 11
+Hostname server: maychucuavietanh
+IP server: 103.216.118.115
+Số container đang chạy: 2
+Tên container web: landing-public (image devops-landing:v1.1) và landing-preview (image devops-landing:v1.0)
+Tên container database: không có
+Port web đang dùng: 8080 (landing-public) và 8081 (landing-preview)
+Port database đang dùng: không có
+Volume đang lưu dữ liệu: không có volume nào
+
+Có 3 rủi ro kỹ thuật đã ghi nhận:
+- Không có database và không có volume để lưu dữ liệu -> dữ liệu người dùng sẽ bị mất khi container bị xóa hoặc tạo lại do không có nơi lưu trữ bền vững.
+- Cổng 8081 (bản preview) đang mở trên 0.0.0.0 nên ai cũng truy cập được -> bản preview bị lộ ra ngoài, trong khi đây là dịch vụ nội bộ không được phép công khai.
+- SSH cho phép đăng nhập root bằng mật khẩu và trong log đã có nhiều lần thử mật khẩu sai từ IP lạ -> server có nguy cơ bị dò mật khẩu và bị chiếm quyền.
+
+3 việc em sẽ làm nếu được vận hành server này:
+- Tạo volume (hoặc database) và mount vào container -> để server có nơi lưu dữ liệu bền vững.
+- Dùng tường lửa (UFW) chỉ cho phép một số IP truy cập bản preview và database, hoặc đưa server lên tên miền rồi dùng nginx làm reverse proxy để điều phối request tới đúng cổng -> tránh để lộ các dịch vụ nội bộ.
+- Tắt đăng nhập root bằng mật khẩu, chuyển sang SSH key với user thường dùng sudo, và cài Fail2ban để tự chặn IP dò mật khẩu.
