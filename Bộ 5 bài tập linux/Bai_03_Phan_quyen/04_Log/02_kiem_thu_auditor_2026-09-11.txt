@@ -1,0 +1,18 @@
+# Phien kiem thu tai khoan auditor - chep lai tu MC-08
+
+$ whoami
+auditor
+$ cd srv/company/logs
+$ cd /
+$ cd srv/company/app
+-sh: 24: cd: can't cd to srv/company/app
+$ cd srv/company/backup
+-sh: 25: cd: can't cd to srv/company/backup
+
+# Ket qua:
+#   cd srv/company/logs   -> THANH CONG. Luu y: thu muc hien hanh truoc lenh nay
+#                            khong hien thi trong anh; duong dan tuong doi nay chi
+#                            ton tai khi dang dung o "/".
+#   cd / roi cd srv/company/app    -> BI TU CHOI (dung ky vong)
+#   cd / roi cd srv/company/backup -> BI TU CHOI (dung ky vong)
+#   (Sau "cd /", duong dan tuong doi srv/company/... tro dung /srv/company/...)

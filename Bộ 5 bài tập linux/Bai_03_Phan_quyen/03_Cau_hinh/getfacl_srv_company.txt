@@ -1,0 +1,46 @@
+# Trich xuat tu MC-04 (getfacl, 11/09/2026)
+
+# file: srv/company/app
+# owner: opsadmin
+# group: appdeploy
+# flags: -s-
+user::rwx
+group::rwx
+group:appdeploy:rwx
+mask::rwx
+other::---
+default:user::rwx
+default:group::rwx
+default:group:appdeploy:rwx
+default:mask::rwx
+default:other::---
+
+# file: srv/company/logs
+# owner: opsadmin
+# group: audit
+# flags: -s-
+user::rwx
+group::r-x
+group:audit:r-x
+mask::r-x
+other::---
+default:user::rwx
+default:group::r-x
+default:group:audit:r-x
+default:mask::r-x
+default:other::---
+
+# file: srv/company/backup
+# owner: opsadmin
+# group: ops
+# flags: -s-
+user::rwx
+group::rwx
+group:ops:rwx
+mask::rwx
+other::---
+default:user::rwx
+default:group::rwx
+default:group:ops:rwx
+default:mask::rwx
+# (anh chup MC-04 bi cat tai dong nay; dong default:other chua duoc ghi nhan)

@@ -1,0 +1,36 @@
+# Chep lai tu MC-02 va MC-08 - so lan "Failed password" theo IP trong /var/log/auth.log
+
+## Lan 1 (MC-02) - tach IP bang awk theo vi tri truong
+root@maychucuavietanh:/var/log# sudo grep "Failed password" /var/log/auth.log \
+| awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | head -10
+     31 103.186.62.23
+     16 14.0.22.154
+      6 37.19.205.163
+      6 146.70.192.172
+      4 1.52.236.115
+      4 113.23.44.41
+      2 COMMAND=/usr/bin/grep        <- DONG NHIEM: chinh lenh sudo grep duoc ghi vao auth.log
+      2 27.79.217.108
+
+## Lan 2 (MC-08) - tach IP bang regex sau tu khoa "from", loai duoc dong nhiem
+root@maychucuavietanh:~# grep "Failed password" /var/log/auth.log | grep -oP 'from \K[0-9\.]+' \
+| sort | uniq -c | sort -nr | head -n 10
+     33 103.186.62.23
+     16 14.0.22.154
+      6 37.19.205.163
+      6 146.70.192.172
+      4 1.52.236.115
+      4 113.23.44.41
+      2 27.79.217.108
+
+# auth.log hien hanh chi co 7 nguon co "Failed password"; bang tren la toan bo.
+# 103.186.62.23 tang tu 31 len 33 giua hai lan chay, phu hop voi viec nguon nay
+# tiep tuc thu trong luc dieu tra (lastb ghi nhan lan thu luc 16:33).
+
+## Doi chieu dang nhap thanh cong cua cac IP co that bai (MC-08)
+grep "Accept" /var/log/auth.log | grep -oP '14.0.22.154'     | ... ->  13
+grep "Accept" /var/log/auth.log | grep -oP ' 1.52.236.115'   | ... ->   2
+grep "Accept" /var/log/auth.log | grep -oP '27.79.217.108'   | ... ->   9
+grep "Accept" /var/log/auth.log | grep -oP '146.70.192.172'  | ... ->   1
+grep "Accept" /var/log/auth.log | grep -oP '113.23.44.41'    | ... ->   7
+# Chua chay cho 103.186.62.23 va 37.19.205.163.

@@ -1,0 +1,69 @@
+BÀI 3 - CHECKLIST KIỂM THỬ
+Sinh viên: Trần Đức Việt Anh | Server: maychucuavietanh | Ngày: 11/09/2026
+
+Quy ước trạng thái:
+  [PASS]    Đạt, có minh chứng kèm theo
+  [FAIL]    Không đạt theo minh chứng hiện có
+  [CHƯA MC] Chưa có minh chứng, chưa được tính là đạt
+
+----------------------------------------------------------------------
+A. TÀI KHOẢN VÀ GROUP
+----------------------------------------------------------------------
+[PASS]    01. Tạo 4 tài khoản opsadmin, deployer, auditor, guestlab      MC-01
+[PASS]    02. Group theo vai trò: ops, appdeploy, audit                  MC-01
+[FAIL]    03. Chỉ tài khoản quản trị có sudo toàn quyền                  MC-01
+              auditor và guestlab đang thuộc group sudo (Sự cố S1)
+[PASS]    04. Không tài khoản nào thuộc group docker (quyết định: không   MC-01
+              thêm; phân tích ở mục 4.6 báo cáo)
+[CHƯA MC] 05. Log thay đổi user/group trong /var/log/auth.log
+
+----------------------------------------------------------------------
+B. THƯ MỤC, PERMISSION, SETGID, ACL
+----------------------------------------------------------------------
+[PASS]    06. Tạo /srv/company/app, logs, backup                         MC-02
+[PASS]    07. Owner/group theo vai trò (opsadmin : appdeploy/audit/ops)  MC-02, MC-03
+[PASS]    08. Permission 2770 / 2750 / 2770, other = ---                 MC-03, MC-05
+[PASS]    09. Setgid trên cả 3 thư mục (flags: -s-)                      MC-04
+[PASS]    10. Default ACL trên app và logs                               MC-04
+[PASS]    11. Default ACL trên backup (ảnh cắt trước dòng default:other)  MC-04
+[PASS]    12. Kiểm tra quyền từng thành phần đường dẫn bằng namei        MC-05
+[CHƯA MC] 13. File/thư mục mới tạo kế thừa đúng group và ACL
+
+----------------------------------------------------------------------
+C. KIỂM THỬ THEO TỪNG TÀI KHOẢN
+----------------------------------------------------------------------
+[PASS]    14. deployer vào được app                                      MC-07
+[PASS]    15. deployer bị từ chối ở logs                                 MC-07
+[FAIL]    16. deployer bị từ chối ở backup: lệnh kiểm thử dùng đường dẫn  MC-07
+              tương đối từ home nên kết quả không hợp lệ (Sự cố S2)
+[CHƯA MC] 17. deployer tạo, sửa, đổi tên, xóa file trong app
+[PASS]    18. auditor vào được logs                                      MC-08
+[PASS]    19. auditor bị từ chối ở app và backup                         MC-08
+[CHƯA MC] 20. auditor đọc được nội dung file log (logs đang rỗng)
+[FAIL]    21. auditor không ghi/xóa/đổi tên/chmod được log: chưa kiểm thử
+              và auditor còn sudo toàn quyền (Sự cố S1)
+[PASS]    22. guestlab nhận thông báo từ chối ở cả 3 thư mục             MC-09
+[FAIL]    23. guestlab không thể vượt qua bằng sudo (Sự cố S1)           MC-01
+[CHƯA MC] 24. Tài khoản không đủ quyền thử chmod/chown và bị từ chối
+[CHƯA MC] 25. opsadmin thao tác trên cả 3 thư mục
+
+----------------------------------------------------------------------
+D. SUDO
+----------------------------------------------------------------------
+[PASS]    26. deployer chỉ có danh sách lệnh tối thiểu, không ALL,       MC-06
+              không NOPASSWD, không thuộc group sudo
+[CHƯA MC] 27. Nội dung file /etc/sudoers.d/... và kết quả visudo -c
+[CHƯA MC] 28. Thực thi 1 lệnh sudo trong danh sách: thành công
+[CHƯA MC] 29. Thực thi 1 lệnh sudo ngoài danh sách: bị từ chối
+[CHƯA MC] 30. Lịch sử thực thi sudo (journalctl _COMM=sudo)
+
+----------------------------------------------------------------------
+E. UMASK VÀ QUY ĐỊNH CHUNG
+----------------------------------------------------------------------
+[CHƯA MC] 31. Cấu hình umask cho tài khoản vận hành và kiểm tra file mới
+[FAIL]    32. Không dùng root để thực hiện bài: cấu hình và thu minh chứng  MC-01..06
+              đang dùng phiên root (Sự cố S3)
+[PASS]    33. Hồ sơ không chứa mật khẩu, private key; IP máy khách đã che MC-07
+
+----------------------------------------------------------------------
+TỔNG HỢP: 33 tiêu chí | PASS 17 | FAIL 5 | CHƯA MC 11

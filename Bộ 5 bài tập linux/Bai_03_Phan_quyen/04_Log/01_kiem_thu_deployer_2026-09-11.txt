@@ -1,0 +1,23 @@
+# Phien kiem thu tai khoan deployer - chep lai tu MC-07
+# Thoi diem: Fri Sep 11 12:34:34 PM +07 2026 (theo MOTD)
+# IP may khach da duoc che.
+
+C:\Users\DELL>ssh -p 24700 deployer@103.216.118.115
+deployer@103.216.118.115's password:
+Welcome to Ubuntu 24.04.1 LTS (GNU/Linux 6.8.0-139-generic x86_64)
+ System information as of Fri Sep 11 12:34:34 PM +07 2026
+  System load:  0.0      Processes:             117
+  Usage of /:   17.6% of 19.93GB   Users logged in: 1
+  Memory usage: 12%      IPv4 address for eth0: 103.216.118.115
+  Swap usage:   0%
+Last login: Fri Sep 11 12:28:25 2026 from <CLIENT_IP>
+$ cd /srv/company/app
+$ cd /srv/company/logs
+-sh: 2: cd: can't cd to /srv/company/logs
+$ cd srv/company/backup
+-sh: 3: cd: can't cd to srv/company/backup
+
+# Ket qua:
+#   cd /srv/company/app   -> THANH CONG (dung ky vong: deployer thuoc appdeploy, rwx)
+#   cd /srv/company/logs  -> BI TU CHOI (dung ky vong: logs khong cap quyen cho deployer)
+#   cd srv/company/backup -> BI TU CHOI (dung ky vong: backup khong cap quyen cho deployer)

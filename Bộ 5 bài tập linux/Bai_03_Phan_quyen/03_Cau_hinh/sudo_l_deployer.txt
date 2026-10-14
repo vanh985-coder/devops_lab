@@ -1,0 +1,24 @@
+# Trich xuat tu MC-06: chinh sach sudo dang co hieu luc cua deployer
+# (lenh: sudo -l -U deployer, 11/09/2026)
+
+Matching Defaults entries for deployer on maychucuavietanh:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin,
+    use_pty
+
+User deployer may run the following commands on maychucuavietanh:
+    (root) /usr/bin/systemctl start chrony.service, /usr/bin/systemctl stop chrony.service,
+        /usr/bin/systemctl restart chrony.service, /usr/bin/systemctl status chrony.service
+
+# Doc hieu:
+#   (root)          : chi duoc chay voi tu cach root, dung 4 lenh tren (duong dan tuyet doi).
+#   Khong co NOPASSWD: moi lan sudo deu phai nhap mat khau cua deployer.
+#   Khong co ALL=(ALL) ALL, deployer khong thuoc group sudo.
+#   use_pty         : lenh sudo chay trong pseudo-terminal rieng, han che tien trinh
+#                     nen tiep tuc chay sau khi phien sudo ket thuc.
+#
+# Quy tac sudoers tuong duong voi chinh sach tren:
+#   deployer ALL=(root) /usr/bin/systemctl start chrony.service, \
+#                       /usr/bin/systemctl stop chrony.service, \
+#                       /usr/bin/systemctl restart chrony.service, \
+#                       /usr/bin/systemctl status chrony.service

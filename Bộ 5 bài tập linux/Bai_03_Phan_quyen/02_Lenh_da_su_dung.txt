@@ -1,0 +1,89 @@
+BÀI 3 - PHÂN QUYỀN LINUX THEO VAI TRÒ VÀ KIỂM SOÁT TRUY CẬP THƯ MỤC
+Danh sách lệnh quan trọng đã sử dụng
+Sinh viên: Trần Đức Việt Anh | Server: maychucuavietanh (Ubuntu 24.04.1 LTS)
+Đã loại bỏ mật khẩu. Các lệnh cấu hình (phần A-F) được thực hiện trong phiên
+root (xem Sự cố S3 trong báo cáo); trạng thái sau cùng được kiểm chứng ở phần G.
+
+======================================================================
+A. TẠO GROUP THEO VAI TRÒ
+======================================================================
+groupadd ops          # nhóm quản trị hệ thống   (gid 1004)
+groupadd appdeploy    # nhóm triển khai nội dung (gid 1005)
+groupadd audit        # nhóm kiểm toán log       (gid 1006)
+
+======================================================================
+B. TẠO TÀI KHOẢN
+======================================================================
+useradd -m opsadmin   # -m: tạo thư mục home
+useradd -m deployer
+useradd -m auditor
+useradd -m guestlab
+passwd <user>         # đặt mật khẩu từng tài khoản (không ghi lại mật khẩu)
+# Ghi chú: useradd không có -s nên shell mặc định là /bin/sh (dash);
+# thấy qua thông báo lỗi dạng "-sh: N: cd: can't cd to ..." khi kiểm thử.
+
+======================================================================
+C. GÁN TÀI KHOẢN VÀO GROUP VAI TRÒ
+======================================================================
+usermod -aG sudo,ops opsadmin   # -a: thêm vào, không xóa group cũ; -G: danh sách group phụ
+usermod -aG appdeploy deployer
+usermod -aG audit auditor
+# guestlab: không thuộc group vai trò nào.
+# Ghi chú Sự cố S1: MC-01 cho thấy auditor và guestlab đang thuộc group sudo(27).
+
+======================================================================
+D. CÂY THƯ MỤC, OWNER, GROUP, PERMISSION, SETGID
+======================================================================
+mkdir -p /srv/company/app /srv/company/logs /srv/company/backup
+chown opsadmin:appdeploy /srv/company/app
+chown opsadmin:audit     /srv/company/logs
+chown opsadmin:ops       /srv/company/backup
+chmod 2770 /srv/company/app      # 2=setgid; owner rwx, group rwx, other ---
+chmod 2750 /srv/company/logs     # group chỉ r-x: auditor đọc, không tạo/xóa/đổi tên
+chmod 2770 /srv/company/backup   # chỉ opsadmin (owner) và group ops
+# setgid trên thư mục: file/thư mục mới tạo bên trong kế thừa group của thư mục
+# thay vì group chính của người tạo.
+
+======================================================================
+E. ACL HIỆN HÀNH VÀ ACL MẶC ĐỊNH (DEFAULT ACL)
+======================================================================
+setfacl -m g:appdeploy:rwx /srv/company/app
+setfacl -d -m u::rwx,g::rwx,g:appdeploy:rwx,o::--- /srv/company/app
+setfacl -m g:audit:rx /srv/company/logs
+setfacl -d -m u::rwx,g::rx,g:audit:rx,o::--- /srv/company/logs
+setfacl -m g:ops:rwx /srv/company/backup
+setfacl -d -m u::rwx,g::rwx,g:ops:rwx,o::--- /srv/company/backup
+# -m: sửa ACL hiện hành; -d: sửa ACL mặc định mà file/thư mục con sẽ kế thừa.
+# Khi thư mục có default ACL, quyền của file mới lấy theo default ACL, umask
+# của người tạo không còn được áp dụng.
+
+======================================================================
+F. SUDOERS CHO DEPLOYER
+======================================================================
+visudo -f /etc/sudoers.d/deployer
+# visudo kiểm tra cú pháp trước khi lưu, tránh lỗi làm hỏng toàn bộ sudo.
+# Quy tắc có hiệu lực (xem 03_Cau_hinh/sudo_l_deployer.txt):
+#   deployer ALL=(root) /usr/bin/systemctl {start,stop,restart,status} chrony.service
+# Không NOPASSWD, không ALL=(ALL) ALL, deployer không thuộc group sudo.
+
+======================================================================
+G. KIỂM TRA CẤU HÌNH (có minh chứng)
+======================================================================
+id opsadmin ; id deployer ; id auditor ; id guestlab   # MC-01: uid, gid, group phụ
+ls -la /srv/company                                    # MC-02: owner, group, mode, dấu '+' (ACL)
+ls -ld /srv/company/app /srv/company/logs /srv/company/backup   # MC-03
+getfacl /srv/company/app /srv/company/logs /srv/company/backup  # MC-04: ACL + flags setgid
+namei -l /srv/company/app                              # MC-05: quyền trên từng thành phần đường dẫn
+namei -l /srv/company/logs
+namei -l /srv/company/backup
+sudo -l -U deployer                                    # MC-06: danh sách lệnh sudo của deployer
+
+======================================================================
+H. KIỂM THỬ BẰNG TỪNG TÀI KHOẢN (có minh chứng)
+======================================================================
+ssh -p 24700 deployer@<SERVER_PUBLIC_IP>   # MC-07: đăng nhập bằng deployer
+cd /srv/company/app                        # được phép
+cd /srv/company/logs                       # bị từ chối
+whoami                                     # MC-08, MC-09: xác nhận tài khoản đang đăng nhập
+cd /                                       # đứng ở / để đường dẫn tương đối trỏ đúng /srv/company
+cd srv/company/app ; cd srv/company/logs ; cd srv/company/backup

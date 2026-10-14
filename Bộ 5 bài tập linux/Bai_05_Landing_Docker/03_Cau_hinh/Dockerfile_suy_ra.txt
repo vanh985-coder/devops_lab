@@ -1,0 +1,22 @@
+# LUU Y: day KHONG phai ban sao file Dockerfile goc.
+# Day la noi dung SUY RA tu `docker history devops-landing:v1.0` (MC-01)
+# va cot COMMAND cua `docker ps` (MC-02). Can thay bang file that truoc khi nop.
+
+FROM busybox:stable
+WORKDIR /www
+COPY index.html .            # layer 20.5kB, khop kich thuoc index.html
+EXPOSE 8080
+CMD ["httpd", "-f", "-p", "8080", "-h", "/www"]
+
+# Doi chieu tung layer trong MC-01 (doc tu duoi len):
+#   73aaf090f3d8  BusyBox 1.36.1 (glibc), Debian 13   4.48MB   <- image nen
+#   1a49b5cd4e50  WORKDIR /www                        0B
+#   a8ffdfe50751  COPY file:824daf15e3fc4c07...       20.5kB
+#   36cda00e5e74  EXPOSE 8080                         0B
+#   6095f079f14b  CMD ["httpd" "-f" "-p" "8..."]      0B       <- image ID cuoi
+#
+# Ghi chu ky thuat:
+#   - httpd -f : chay foreground, bat buoc de container khong thoat ngay.
+#   - -p 8080  : lang nghe cong 8080 BEN TRONG container (khong phai cong host).
+#   - -h /www  : thu muc goc cua web server.
+#   - Image tong 6.72MB, content size 2.21MB - dung yeu cau "toi gian".

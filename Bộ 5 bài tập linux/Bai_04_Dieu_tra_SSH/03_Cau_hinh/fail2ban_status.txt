@@ -1,0 +1,26 @@
+# Trich xuat tu MC-09: trang thai Fail2ban ngay sau khi cai dat (truoc 21:20 11/09/2026)
+
+root@maychucuavietanh:~# fail2ban-client status
+Status
+|- Number of jail:      1
+`- Jail list:   sshd
+
+root@maychucuavietanh:~# fail2ban-client status sshd
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed: 0
+|  |- Total failed:     0
+|  `- Journal matches:  _SYSTEMD_UNIT=sshd.service + _COMM=sshd
+`- Actions
+   |- Currently banned: 0
+   |- Total banned:     0
+   `- Banned IP list:
+
+# Ghi chu:
+# - Total failed = 0 du auth.log co hon 70 lan that bai: backend systemd chi doc
+#   ban ghi journal MOI sau khi jail khoi dong, khong quet lai lich su.
+# - Journal matches dung dieu kien OR ("+"): unit sshd.service HOAC tien trinh
+#   ten sshd. Tren Ubuntu 24.04 unit ten la ssh.service, nhung dieu kien
+#   _COMM=sshd van bat duoc su kien (MC-10 co cac dong "Found").
+# - jail.local dat "port = ssh" => cong 22 (/etc/services). SSH thuc te chay
+#   cong 24700 (MC-01). Xem Su co S1 trong bao cao.

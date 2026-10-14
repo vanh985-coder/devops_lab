@@ -1,0 +1,47 @@
+
+1. Xác định phiên bản Ubuntu, kernel, hostname, múi giờ, thời gian hệ thống và
+tình trạng đồng bộ thời gian.
+hostnamectl 
+timedatectl
+2. Xác định toàn bộ network interface, trạng thái UP/DOWN, địa chỉ IPv4/IPv6,
+MTU và interface đang mang default route.
+ip a
+3. Lập bảng route hiện tại, default gateway và đường đi dự kiến của lưu lượng đến
+Internet, VPN và mạng nội bộ
+ip route
+ip route get 8.8.8.8
+ip route get 172.216.245.15
+4. Xác định DNS server đang được sử dụng; kiểm tra phân giải tên miền và phân
+biệt lỗi DNS với lỗi mất kết nối mạng.
+resolvectl
+ping 8.8.8.8
+nslookup google.com
+5. Thống kê toàn bộ cổng TCP/UDP đang lắng nghe; với mỗi cổng phải chỉ ra
+tiến trình, PID, user chạy tiến trình và dịch vụ liên quan.
+ss -tuln
+ss -tulnpe
+6. Lập bảng phân loại cổng: bắt buộc phải giữ, được phép đóng, chưa xác định
+mục đích và cần giảng viên xác nhận.
+7. Kiểm tra các service đang chạy, service lỗi, service tự khởi động cùng hệ thống
+và các service không cần thiết.
+systemctl list-units --types=service --state=running --no-pager
+systemctl --failed
+systemctl list-unit-files --types=service --state=enabled --no-pager
+systemctl list-units --types=socket --state=enabled --no-pager
+8. Kiểm tra CPU, RAM, swap, dung lượng từng filesystem, inode và 10 thư mục
+hoặc file chiếm nhiều dung lượng nhất trong phạm vi được phép.
+df -h
+df -i
+sudo du -ah --max-depth=2 / 2>/dev/null | sort -hr | head -n 10
+lscpu
+9. Kiểm tra lịch sử đăng nhập, người dùng đang online và các phiên SSH hiện tại
+last
+lastb
+w
+ss -tuln
+10. Chuẩn hóa hostname, timezone, package và trạng thái service; không được
+thay đổi route hoặc SSH theo cách gây mất kết nối.
+sudo hostnamectl set-hostname vietanh
+sudo timedatectl set-timezome Asia/Ho_Chi_Minh
+sudo apt update && sudo apt upgrade -y
+sudo systemctl enable --now 

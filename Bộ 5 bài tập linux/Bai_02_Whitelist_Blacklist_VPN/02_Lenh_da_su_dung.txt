@@ -1,0 +1,24 @@
+1. Lựa chọn UFW hoặc nftables làm công cụ chính; không triển khai song song nhiều cơ chế gây xung đột mà không giải thích.
+systemctl unmask ufw
+systemctl start ufw
+systemctl status ufw
+2. Sao lưu cấu hình firewall hiện tại trước khi thay đổi.
+tar -czf  ~/root/backup.tar.gz etc/ufw etc/default/ufw
+3. Xây dựng bảng ma trận truy cập gồm nguồn, đích, cổng, giao thức, hành động và lý do
+ss -tuln
+4. Áp dụng rule theo từng bước và kiểm tra sau mỗi thay đổi; phải duy trì phiên
+SSH dự phòng.
+5. Kiểm tra thứ tự ưu tiên giữa blacklist và whitelist; chứng minh địa chỉ blacklist không vượt qua được rule allow rộng.
+ufw allow 8080/tcp
+ufw deny from 42.113.162.76 to any port 8080
+ufw delete deny from 42.113.162.76 to any port 8080
+ufw insert 1 deny from 42.113.162.76 to any port 8080
+6. Kiểm tra cổng lắng nghe thực tế trước khi mở firewall; không tạo rule cho dịch
+vụ chưa tồn tại mà không nêu mục đích.
+ss -tuln | grep -E '0./0./0./0.|[//:0:0]'
+7. Bật và kiểm tra firewall log; xác định ít nhất một bản ghi từ chối có nguồn, thời
+gian, cổng đích và giao thức.
+ufw logging medium
+ufw status verbose
+tail -f /var/log/ufw.log
+8. Kiểm tra tính bền vững sau reboot hoặc reload dịch vụ firewall.

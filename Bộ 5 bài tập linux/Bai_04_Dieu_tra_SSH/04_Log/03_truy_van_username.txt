@@ -1,0 +1,9 @@
+# Chep lai tu MC-03 - truy van username bi thu (KET QUA KHONG HOP LE)
+
+root@maychucuavietanh:/var/log# sudo grep -oP 'invalid user \K\S+' /var/log/auth.log | sort | uniq -c | sort -r | head -n 2
+      5 \\K\\S+'
+     (dong thu 2 bi cat trong anh)
+
+# Dong "5 \\K\\S+'" khong phai username: day la 5 dong log sudo ghi lai chinh cau
+# lenh grep (sudo luu COMMAND=... voi dau \ duoc escape). Truy van bi nhiem boi du
+# lieu do nguoi dieu tra tao ra. Thong ke username trong bao cao dung lastb (MC-05, MC-06).

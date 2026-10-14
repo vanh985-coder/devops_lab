@@ -1,0 +1,33 @@
+# Chep lai tu MC-01 - ghi nhan hien trang khi bat dau dieu tra (11/09/2026)
+
+root@maychucuavietanh:~# date
+Fri Sep 11 04:26:48 PM +07 2026
+root@maychucuavietanh:~# who
+root     tty1         2026-09-10 17:51
+root     pts/0        2026-09-11 16:16 (113.23.44.41)
+root@maychucuavietanh:~# w
+ 16:29:57 up 22:39,  2 users,  load average: 0.00, 0.00, 0.00
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU  WHAT
+root              113.23.44.41     16:16   16:08m  0.00s  0.09s sshd: root@pts/0
+root     tty1     -                Thu17   16:52m  0.16s  0.10s -bash
+root@maychucuavietanh:~# date
+Fri Sep 11 04:30:20 PM +07 2026
+root@maychucuavietanh:~# ss -tunap
+Netid State  Recv-Q Send-Q  Local Address:Port        Peer Address:Port   Process
+udp   UNCONN 0      0       127.0.0.54:53             0.0.0.0:*           users:(("systemd-resolve",pid=4345,fd=16))
+udp   UNCONN 0      0       127.0.0.53%lo:53          0.0.0.0:*           users:(("systemd-resolve",pid=4345,fd=14))
+udp   UNCONN 0      0       103.216.118.115%eth0:68   0.0.0.0:*           users:(("systemd-network",pid=4359,fd=22))
+udp   UNCONN 0      0       127.0.0.1:323             0.0.0.0:*           users:(("chronyd",pid=728,fd=5))
+udp   UNCONN 0      0       [::1]:323                 [::]:*              users:(("chronyd",pid=728,fd=6))
+tcp   LISTEN 0      4096    127.0.0.53%lo:53          0.0.0.0:*           users:(("systemd-resolve",pid=4345,fd=15))
+tcp   LISTEN 0      4096    127.0.0.54:53             0.0.0.0:*           users:(("systemd-resolve",pid=4345,fd=17))
+tcp   LISTEN 0      4096    0.0.0.0:24700             0.0.0.0:*           users:(("sshd",pid=1487,fd=3),("systemd",pid=1,fd=177))
+tcp   ESTAB  0      64      103.216.118.115:24700     113.23.44.41:22425  users:(("sshd",pid=7847,fd=4))
+tcp   LISTEN 0      4096    [::]:24700                [::]:*              users:(("sshd",pid=1487,fd=4),("systemd",pid=1,fd=178))
+
+# Nhan xet:
+# - Chi 1 ket noi ESTAB tu ben ngoai: phien quan tri 113.23.44.41 -> :24700.
+# - Cong nghe tren moi dia chi: chi 24700/tcp (SSH). 53 va 323 chi o loopback,
+#   68/udp la DHCP client cua systemd-networkd.
+# - systemd (pid 1) cung giu socket 24700: Ubuntu 24.04 kich hoat SSH qua ssh.socket.
+# - Phien root tren console tty1 mo tu 10/09 17:51, idle ~16h52m.

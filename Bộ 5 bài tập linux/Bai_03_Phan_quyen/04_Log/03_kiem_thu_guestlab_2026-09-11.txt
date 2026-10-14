@@ -1,0 +1,15 @@
+# Phien kiem thu tai khoan guestlab - chep lai tu MC-09
+
+$ whoami
+guestlab
+$ cd /
+$ cd srv/company/app
+-sh: 4: cd: can't cd to srv/company/app
+$ cd srv/company/logs
+-sh: 5: cd: can't cd to srv/company/logs
+$ cd srv/company/backup
+-sh: 6: cd: can't cd to srv/company/backup
+
+# Ket qua: ca 3 thu muc nghiep vu deu BI TU CHOI (dung ky vong: other::---).
+# Luu y: tai thoi diem MC-01, guestlab con thuoc group sudo, nen tu choi o muc
+# quyen thu muc chua chung minh duoc guestlab khong vuot qua bang sudo (Su co S1).

@@ -1,0 +1,86 @@
+BÀI 4 - CHECKLIST KIỂM THỬ
+Sinh viên: Trần Đức Việt Anh | Server: maychucuavietanh | Ngày: 11/09/2026
+
+Quy ước trạng thái:
+  [PASS]    Đạt, có minh chứng kèm theo
+  [FAIL]    Không đạt theo minh chứng hiện có
+  [CHƯA MC] Chưa có minh chứng, chưa được tính là đạt
+Mục báo cáo = mục tương ứng trong 01_Bao_cao.pdf
+
+----------------------------------------------------------------------
+A. GHI NHẬN HIỆN TRẠNG VÀ BẢO TOÀN BẰNG CHỨNG
+----------------------------------------------------------------------
+[PASS]    01. Ghi thời điểm bắt đầu điều tra (16:26:48, 11/09/2026)      MC-01
+[PASS]    02. Ghi trạng thái server (uptime 22:39, load 0.00)             MC-01
+[PASS]    03. Kiểm tra user đang online (2 phiên root: pts/0, tty1)       MC-01
+[PASS]    04. Kiểm tra connection hiện tại (1 ESTAB: 113.23.44.41)        MC-01
+[CHƯA MC] 05. Backup auth.log / SSH journal (cp + sha256sum)              Mục 4.1
+
+----------------------------------------------------------------------
+B. PHÂN TÍCH LOG
+----------------------------------------------------------------------
+[PASS]    06. Phân tích Failed password                                   MC-02, MC-08
+[PASS]    07. Thống kê Top IP: auth.log chỉ có 7 nguồn, đã liệt kê toàn bộ MC-08, mục 4.2
+[PASS]    08. Thống kê username bị thử: root 82/83 lần qua SSH            MC-05, MC-06
+[CHƯA MC] 09. Xác định invalid username: truy vấn MC-03 bị nhiễm bởi
+              log sudo, cần chạy lại có lọc tiến trình sshd               MC-03, Sự cố S3
+[PASS]    10. Kiểm tra login thành công (45 phiên từ 12 IP)               MC-04
+[CHƯA MC] 11. Đối chiếu IP login thành công với VPN whitelist:
+              7 IP có phiên root chưa xác nhận chủ sở hữu                 MC-04, mục 4.4
+
+----------------------------------------------------------------------
+C. KIỂM TRA DẤU HIỆU BẤT THƯỜNG
+----------------------------------------------------------------------
+[PASS]    12. Kiểm tra process                                            MC-07
+[PASS]    13. Kiểm tra network connection                                 MC-01, MC-07
+[PASS]    14. Kiểm tra service                                            MC-07
+[CHƯA MC] 15. Kiểm tra cron: cron.service đang chạy nhưng chưa xem
+              nội dung crontab và /etc/cron.*                             MC-07
+
+----------------------------------------------------------------------
+D. PHÂN LOẠI VÀ BLACKLIST
+----------------------------------------------------------------------
+[PASS]    16. Phân loại IP (4 nhóm, có căn cứ log)                        Mục 4.6
+[PASS]    17. Lập blacklist: 103.186.62.23                                Mục 7.2
+[CHƯA MC] 18. Kiểm tra firewall rule (ufw status numbered / nft list ruleset)
+
+----------------------------------------------------------------------
+E. FAIL2BAN
+----------------------------------------------------------------------
+[PASS]    19. Cài Fail2ban                                                MC-09
+[FAIL]    20. Cấu hình SSH jail: port = ssh (cổng 22) trong khi SSH chạy
+              24700; chưa có ignoreip cho IP VPN                          jail.local, Sự cố S1, S2
+[PASS]    21. Kiểm tra fail2ban status                                    MC-09
+[PASS]    22. Kiểm tra ban: Ban 113.23.44.41 lúc 21:25:34
+              (ở mức log; chặn thực tế ở cổng 24700 chưa chứng minh)      MC-10
+[PASS]    23. Kiểm tra log ban                                            MC-10
+[PASS]    24. Kiểm tra unban: Unban lúc 21:35:35, đúng bantime 10 phút    MC-10
+[PASS]    25. Kiểm tra sau restart: jail khởi động lại 21:20:15 và khôi
+              phục ban 172.216.245.31 (chưa có minh chứng sau reboot)     MC-10, mục 5.2
+
+----------------------------------------------------------------------
+F. KỊCH BẢN KIỂM THỬ
+----------------------------------------------------------------------
+[CHƯA MC] 26. VPN cá nhân vẫn SSH được sau blacklist và Fail2ban
+[CHƯA MC] 27. IP blacklist bị SSH deny
+[PASS]    28. Có log chứng minh deny/ban: có log ban; log deny của
+              firewall chưa có                                            MC-10
+
+----------------------------------------------------------------------
+G. SẢN PHẨM NỘP
+----------------------------------------------------------------------
+[PASS]    29. Hoàn thành báo cáo sự cố (timeline, nguồn log, kết luận)    01_Bao_cao.pdf
+[PASS]    30. Hoàn thành Top IP                                           Mục 4.2
+[PASS]    31. Hoàn thành Top username                                     Mục 4.3
+[PASS]    32. Hoàn thành bảng phân loại                                   Mục 4.6
+[PASS]    33. Hoàn thành blacklist + lý do + thời hạn                     Mục 7.2
+[PASS]    34. Hoàn thành đề xuất phòng ngừa (hệ thống và quy trình)       Mục 7.3
+
+----------------------------------------------------------------------
+H. QUY ĐỊNH CHUNG (bổ sung ngoài danh sách trên)
+----------------------------------------------------------------------
+[FAIL]    35. Không dùng root: toàn bộ điều tra chạy trong phiên root     MC-01..10, Sự cố S4
+[PASS]    36. Không tấn công hay thử mật khẩu hệ thống ngoài phạm vi      MC-10
+
+----------------------------------------------------------------------
+TỔNG HỢP: 36 tiêu chí | PASS 27 | FAIL 2 | CHƯA MC 7

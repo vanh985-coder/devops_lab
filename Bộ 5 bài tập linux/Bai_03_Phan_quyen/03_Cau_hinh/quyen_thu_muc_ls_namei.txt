@@ -1,0 +1,41 @@
+# Trich xuat tu MC-02, MC-03, MC-05 (11/09/2026)
+
+$ ls -la /srv/company
+total 0
+drwxr-xr-x  5 root     root       43 Sep 11 00:01 .
+drwxr-xr-x  3 root     root       21 Sep 10 23:54 ..
+drwxrws---+ 2 opsadmin appdeploy  22 Sep 11 10:07 app
+drwxrws---+ 2 opsadmin ops         6 Sep 11 00:01 backup
+drwxr-s---+ 2 opsadmin audit       6 Sep 11 00:00 logs
+
+# Doc hieu:
+#   app    : 2770 + ACL  owner opsadmin, group appdeploy (setgid 's')
+#   logs   : 2750 + ACL  owner opsadmin, group audit     (setgid 's', group chi r-x)
+#   backup : 2770 + ACL  owner opsadmin, group ops       (setgid 's')
+#   Dau '+' cuoi chuoi quyen = thu muc co ACL mo rong.
+#   other = '---' tren ca 3 thu muc => guestlab (khong thuoc group nao) bi tu choi.
+
+$ namei -l /srv/company/app
+f: /srv/company/app
+drwxr-xr-x root     root      /
+drwxr-xr-x root     root      srv
+drwxr-xr-x root     root      company
+drwxrws--- opsadmin appdeploy app
+
+$ namei -l /srv/company/logs
+f: /srv/company/logs
+drwxr-xr-x root     root  /
+drwxr-xr-x root     root  srv
+drwxr-xr-x root     root  company
+drwxr-s--- opsadmin audit logs
+
+$ namei -l /srv/company/backup
+f: /srv/company/backup
+drwxr-xr-x root     root /
+drwxr-xr-x root     root srv
+drwxr-xr-x root     root company
+drwxrws--- opsadmin ops  backup
+
+# Ket luan namei: /, /srv, /srv/company deu r-x cho other => moi user di qua
+# duoc 3 cap tren; quyen truy cap thuc te chi bi quyet dinh o cap cuoi
+# (app/logs/backup). namei khong hien thi ACL, vi vay can doi chieu getfacl.

@@ -1,0 +1,64 @@
+BÀI 4 - ĐIỀU TRA TRUY CẬP SSH BẤT THƯỜNG VÀ XÂY DỰNG CƠ CHẾ CHẶN
+Danh sách lệnh quan trọng đã sử dụng
+Sinh viên: Trần Đức Việt Anh | Server: maychucuavietanh (Ubuntu 24.04.1 LTS)
+Không chứa mật khẩu. Các lệnh chạy trong phiên root (xem Sự cố S4 trong báo cáo).
+Không viết shell script; chỉ dùng pipe và kết hợp lệnh trực tiếp trên terminal.
+
+======================================================================
+A. GHI NHẬN HIỆN TRẠNG KHI BẮT ĐẦU ĐIỀU TRA (MC-01)
+======================================================================
+date                 # mốc thời gian bắt đầu điều tra (16:26:48, 11/09/2026)
+who                  # user đang đăng nhập, TTY, thời điểm, IP nguồn
+w                    # thêm uptime, load, idle và lệnh đang chạy của từng phiên
+ss -tunap            # -t TCP, -u UDP, -n không phân giải tên, -a mọi trạng thái,
+                     # -p tiến trình sở hữu socket: thấy cổng nghe và kết nối ESTAB
+
+======================================================================
+B. THỐNG KÊ ĐĂNG NHẬP THẤT BẠI THEO IP (MC-02, MC-08)
+======================================================================
+sudo grep "Failed password" /var/log/auth.log | awk '{print $(NF-3)}' \
+  | sort | uniq -c | sort -nr | head -10
+# awk lấy trường thứ 4 từ cuối (vị trí IP trong "... from <IP> port <N> ssh2").
+# Nhược điểm: dòng log sudo "COMMAND=/usr/bin/grep Failed password ..." cũng khớp
+# và bị đếm nhầm (xem Sự cố S3).
+
+grep "Failed password" /var/log/auth.log | grep -oP 'from \K[0-9\.]+' \
+  | sort | uniq -c | sort -nr | head -n 10
+# -o chỉ in phần khớp, -P dùng regex Perl; \K bỏ phần "from " khỏi kết quả.
+# Chỉ lấy chuỗi số sau "from" nên loại được dòng nhiễm của sudo.
+# sort | uniq -c đếm số lần xuất hiện; sort -nr sắp giảm dần theo số.
+
+======================================================================
+C. ĐỐI CHIẾU ĐĂNG NHẬP THÀNH CÔNG CỦA CÁC IP CÓ THẤT BẠI (MC-08)
+======================================================================
+grep "Accept" /var/log/auth.log | grep -oP '14.0.22.154'    | sort | uniq -c | sort -nr | head -n 10
+grep "Accept" /var/log/auth.log | grep -oP ' 1.52.236.115'  | sort | uniq -c | sort -nr | head -n 10
+grep "Accept" /var/log/auth.log | grep -oP '27.79.217.108'  | sort | uniq -c | sort -nr | head -n 10
+grep "Accept" /var/log/auth.log | grep -oP '146.70.192.172' | sort | uniq -c | sort -nr | head -n 10
+grep "Accept" /var/log/auth.log | grep -oP '113.23.44.41'   | sort | uniq -c | sort -nr | head -n 10
+# "Accept" khớp dòng "Accepted password/publickey for <user> from <IP>".
+
+======================================================================
+D. USERNAME BỊ THỬ, PHIÊN THÀNH CÔNG VÀ THẤT BẠI (MC-03 .. MC-06)
+======================================================================
+sudo grep -oP 'invalid user \K\S+' /var/log/auth.log | sort | uniq -c | sort -r | head -n 2
+# Kết quả bị nhiễm bởi log sudo, không dùng được (Sự cố S3).
+last                 # đọc /var/log/wtmp: phiên đăng nhập thành công, reboot
+lastb                # đọc /var/log/btmp: đăng nhập thất bại kèm username thử
+
+======================================================================
+E. KIỂM TRA TIẾN TRÌNH, CỔNG, SERVICE (MC-07)
+======================================================================
+ps aux --sort=-%cpu | head      # 10 tiến trình dùng CPU nhiều nhất
+ss -tuln                        # chỉ các socket đang nghe, dạng số
+systemctl --type=service --state=running   # service đang chạy
+
+======================================================================
+F. TRIỂN KHAI FAIL2BAN (MC-09, MC-10, 03_Cau_hinh/jail.local)
+======================================================================
+apt install fail2ban            # cài đặt (không có ảnh chụp; fail2ban đang chạy ở MC-09)
+nano /etc/fail2ban/jail.local   # cấu hình jail sshd; không sửa jail.conf gốc
+cat /etc/fail2ban/jail.local
+fail2ban-client status          # số jail và danh sách jail
+fail2ban-client status sshd     # số lần thất bại, IP đang bị ban, điều kiện journal
+tail -f /var/log/fail2ban.log   # theo dõi Found / Ban / Unban theo thời gian thực

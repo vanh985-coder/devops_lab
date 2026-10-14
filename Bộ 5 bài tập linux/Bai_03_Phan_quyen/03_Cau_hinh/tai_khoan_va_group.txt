@@ -1,0 +1,20 @@
+# Trich xuat tu MC-01 (lenh id tren server maychucuavietanh, 11/09/2026)
+# Khong chua mat khau hay du lieu nhay cam.
+
+$ id opsadmin
+uid=1000(opsadmin) gid=1000(opsadmin) groups=1000(opsadmin),27(sudo),1004(ops)
+$ id deployer
+uid=1001(deployer) gid=1001(deployer) groups=1001(deployer),1005(appdeploy)
+$ id auditor
+uid=1002(auditor) gid=1002(auditor) groups=1002(auditor),27(sudo),1006(audit)
+$ id guestlab
+uid=1003(guestlab) gid=1003(guestlab) groups=1003(guestlab),27(sudo)
+
+# Group vai tro:
+#   ops       (gid 1004) - quan tri he thong   - thanh vien: opsadmin
+#   appdeploy (gid 1005) - trien khai noi dung - thanh vien: deployer
+#   audit     (gid 1006) - kiem toan log       - thanh vien: auditor
+#
+# CANH BAO (Su co S1 trong bao cao): auditor va guestlab dang thuoc group
+# sudo (gid 27) => co sudo toan quyen, vuot qua moi ACL ben duoi.
+# Khong tai khoan nao trong 4 tai khoan thuoc group docker.

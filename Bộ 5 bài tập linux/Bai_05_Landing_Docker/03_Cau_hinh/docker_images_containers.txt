@@ -1,0 +1,39 @@
+# Chep lai tu MC-01, MC-02, MC-13
+
+## Image (MC-01, truoc khi nang cap)
+root@maychucuavietanh:~# docker images
+IMAGE                ID             DISK USAGE   CONTENT SIZE   EXTRA
+busybox:stable       73aaf090f3d8   6.69MB       2.21MB
+devops-landing:v1.0  6095f079f14b   6.72MB       2.21MB
+
+## Container va cong (MC-02, ~/bai5/landing-page)
+root@maychucuavietanh:~/bai5/landing-page# docker ps
+CONTAINER ID   IMAGE                 COMMAND                 CREATED         STATUS         PORTS                                             NAMES
+e0faf53e976c   devops-landing:v1.0   "httpd -f -p 8080 -h…"  5 minutes ago   Up 5 minutes   0.0.0.0:8081->8080/tcp, [::]:8081->8080/tcp      landing-preview
+44c0af04d486   devops-landing:v1.0   "httpd -f -p 8080 -h…"  6 minutes ago   Up 6 minutes   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp      landing-public
+
+root@maychucuavietanh:~/bai5/landing-page# docker port landing-preview
+8080/tcp -> 0.0.0.0:8081
+8080/tcp -> [::]:8081
+root@maychucuavietanh:~/bai5/landing-page# docker port landing-public
+8080/tcp -> 0.0.0.0:8080
+8080/tcp -> [::]:8080
+
+## Cong tren host (MC-02)
+root@maychucuavietanh:~/bai5/landing-page# ss -tuln
+tcp LISTEN 0 4096  0.0.0.0:8081  0.0.0.0:*
+tcp LISTEN 0 4096  0.0.0.0:8080  0.0.0.0:*
+tcp LISTEN 0 4096  0.0.0.0:24700 0.0.0.0:*
+tcp LISTEN 0 4096  [::]:8081     [::]:*
+tcp LISTEN 0 4096  [::]:8080     [::]:*
+tcp LISTEN 0 4096  [::]:24700    [::]:*
+(cac dong 53, 323, 34689, 68 la DNS/NTP/DHCP noi bo, da luoc)
+
+## Sau khi nang cap va restart Docker (MC-13)
+root@maychucuavietanh:~/bai5/landing-page# systemctl restart docker
+root@maychucuavietanh:~/bai5/landing-page# docker ps
+CONTAINER ID   IMAGE                 CREATED          STATUS        PORTS                          NAMES
+736dab23cf7e   devops-landing:v1.0   6 minutes ago    Up 8 seconds  0.0.0.0:8081->8080/tcp ...     landing-preview
+55d0f166b245   devops-landing:v1.1   13 minutes ago   Up 8 seconds  0.0.0.0:8080->8080/tcp ...     landing-public
+
+# Anh xa cuoi cung: public = v1.1 cong 8080, preview = v1.0 cong 8081.

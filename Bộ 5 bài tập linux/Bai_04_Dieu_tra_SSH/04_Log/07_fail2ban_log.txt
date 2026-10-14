@@ -1,0 +1,24 @@
+# Chep lai tu MC-10 - tail -f /var/log/fail2ban.log (11/09/2026)
+
+2026-09-11 21:20:15,599 fail2ban.filtersystemd  [9910]: INFO    [sshd] Jail is in operation now (process new journal entries)
+2026-09-11 21:20:20,863 fail2ban.jail           [9910]: INFO    Jail 'sshd' started
+2026-09-11 21:20:21,601 fail2ban.actions        [9910]: NOTICE  [sshd] Restore Ban 172.216.245.31
+2026-09-11 21:22:29,900 fail2ban.filter         [9910]: INFO    [sshd] Found 113.23.44.41 - 2026-09-11 21:22:29
+2026-09-11 21:23:00,294 fail2ban.actions        [9910]: NOTICE  [sshd] Unban 172.216.245.31
+2026-09-11 21:25:03,855 fail2ban.filter         [9910]: INFO    [sshd] Found 113.23.44.41 - 2026-09-11 21:25:03
+2026-09-11 21:25:12,399 fail2ban.filter         [9910]: INFO    [sshd] Found 113.23.44.41 - 2026-09-11 21:25:11
+2026-09-11 21:25:22,604 fail2ban.filter         [9910]: INFO    [sshd] Found 113.23.44.41 - 2026-09-11 21:25:22
+2026-09-11 21:25:34,900 fail2ban.filter         [9910]: INFO    [sshd] Found 113.23.44.41 - 2026-09-11 21:25:34
+2026-09-11 21:25:34,964 fail2ban.actions        [9910]: NOTICE  [sshd] Ban 113.23.44.41
+2026-09-11 21:35:35,196 fail2ban.actions        [9910]: NOTICE  [sshd] Unban 113.23.44.41
+2026-09-11 21:35:50,266 fail2ban.filter         [9910]: INFO    [sshd] Found 103.186.62.23 - 2026-09-11 21:35:49
+
+# Doc hieu:
+# 21:20:15-21:20:20  Jail sshd khoi dong lai (PID 9910).
+# 21:20:21           Restore Ban 172.216.245.31: ban da ton tai tu truoc khi khoi dong
+#                    lai, duoc khoi phuc tu co so du lieu cua Fail2ban.
+# 21:23:00           Unban 172.216.245.31 khi het bantime.
+# 21:22:29-21:25:34  5 lan that bai tu 113.23.44.41 trong ~3 phut (< findtime 10m)
+#                    => dat maxretry 5 => Ban 21:25:34.
+# 21:35:35           Unban sau dung 10 phut (bantime 10m).
+# 21:35:49           103.186.62.23 tiep tuc thu; chi 1 lan nen khong dat nguong, khong bi ban.

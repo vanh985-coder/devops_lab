@@ -1,0 +1,17 @@
+# Chep lai tu MC-13 - kiem thu container tu khoi dong lai
+
+root@maychucuavietanh:~/bai5/landing-page# systemctl restart docker
+root@maychucuavietanh:~/bai5/landing-page# docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED          STATUS         PORTS                                          NAMES
+736dab23cf7e   devops-landing:v1.0   "httpd -f -p 8080 -h…"   6 minutes ago    Up 8 seconds   0.0.0.0:8081->8080/tcp, [::]:8081->8080/tcp    landing-preview
+55d0f166b245   devops-landing:v1.1   "httpd -f -p 8080 -h…"   13 minutes ago   Up 8 seconds   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp    landing-public
+
+# Doc hieu:
+#   CREATED 6/13 phut nhung STATUS "Up 8 seconds" => container KHONG bi tao lai,
+#   ma duoc KHOI DONG LAI sau khi Docker daemon restart. Day la bang chung
+#   restart policy dang hoat dong.
+#   Cong publish giu nguyen 8080 va 8081 sau khi khoi dong lai.
+#
+# CHUA THUC HIEN: reboot ca server (yeu cau 8 va kich ban kiem thu cua de).
+# Can bo sung: sudo reboot; sau khi len lai chay
+#   systemctl is-enabled docker ; docker ps ; curl -I http://<IP>:8080

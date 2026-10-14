@@ -1,0 +1,26 @@
+# Chep lai tu MC-03 (ufw status numbered)
+
+root@maychucuavietanh:~# ufw status numbered
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] 24700/tcp                  ALLOW IN    Anywhere
+[ 2] 24700                      ALLOW IN    Anywhere
+[ 3] 172.20.0.2 8080/tcp        ALLOW FWD   Anywhere    # allow landing-public 8080/tcp landing-net
+[ 4] 172.20.0.10 8080/tcp       ALLOW FWD   37.19.205.163
+
+# Doc hieu:
+#   ALLOW IN  : luu luong den chinh host (INPUT).
+#   ALLOW FWD : luu luong duoc dinh tuyen qua host toi container (FORWARD).
+#               Bat buoc phai dung FWD cho container vi goi tin sau khi DNAT
+#               di qua chain FORWARD, khong qua INPUT.
+#   172.20.0.2  : IP container landing-public tren network landing-net.
+#   172.20.0.10 : IP container landing-preview.
+#
+# VAN DE DA GHI NHAN (xem muc 6 bao cao):
+#   - Rule [1] va [2] trung nhau; [2] phu ca tcp lan udp.
+#   - SSH 24700 mo tu Anywhere => chua ap whitelist VPN cua Bai 2 (Su co S1).
+#   - Preview chi cho dung 1 IP /32, khong phai <VPN_SUBNET_LOP> (Su co S2).
+#   - Rule gan cung IP container; container tao lai co the doi IP (Su co S3).
+#   - Chua co minh chung default policy (ufw status verbose).

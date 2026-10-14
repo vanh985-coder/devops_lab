@@ -1,0 +1,19 @@
+# Chep lai tu MC-10 - kiem thu tu mot nguon khac, khong nam trong whitelist preview
+
+C:\Users\Acer>curl ifconfig.me
+172.216.245.25
+
+C:\Users\Acer>curl http://103.216.118.115:8081
+curl: (28) Failed to connect to 103.216.118.115:8081 after 21027 ms: Could not connect to server
+
+C:\Users\Acer>curl http://103.216.118.115:8080
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Khóa Học DevOps Cho Người Mới Bắt Đầu | Master DevOps</title>
+    ... (da luoc)
+
+# Ket qua: nguon ngoai whitelist BI CHAN o preview (8081), VAO DUOC public (8080).
+# Dung chinh sach: chi 37.19.205.163 duoc vao preview.
+# Luu y: neu VPN giang vien khong phai 37.19.205.163 thi cung se bi chan
+# giong truong hop nay (Su co S2).

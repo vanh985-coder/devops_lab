@@ -1,0 +1,27 @@
+# Chep lai tu MC-06 va MC-07 - kiem thu tu Internet cong cong (khong qua VPN)
+
+C:\Users\Acer>curl ifconfig.me
+113.23.44.41
+
+C:\Users\Acer>curl http://103.216.118.115:8080
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khóa Học DevOps Cho Người Mới Bắt Đầu | Master DevOps</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary: #2563eb;
+            ... (phan con lai la CSS/HTML cua landing page, da luoc)
+
+C:\Users\Acer>curl http://103.216.118.115:8081
+curl: (28) Failed to connect to 103.216.118.115:8081 after 21046 ms: Could not connect to server
+
+# Ket qua:
+#   8080 (public)  -> TRUY CAP DUOC, tra ve dung landing page.
+#   8081 (preview) -> BI CHAN. Loi (28) la timeout, dung voi hanh vi DROP cua
+#                     firewall (goi tin bi bo im lang). Neu la REJECT thi curl
+#                     se bao "Connection refused" ngay lap tuc.
+#   Chua kiem thu SSH 24700 tu nguon nay (xem Su co S1).

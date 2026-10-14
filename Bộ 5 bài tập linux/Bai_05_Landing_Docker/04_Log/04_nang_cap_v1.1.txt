@@ -1,0 +1,26 @@
+# Quy trinh nang cap v1.0 -> v1.1 (sinh vien cung cap; khong co anh chup terminal)
+# Minh chung ket qua: MC-11 (truoc) va MC-12 (sau), MC-13 (image v1.1 dang chay)
+
+nano index.html                      # sua tieu de: DevOpsMaster -> DevOpsMaster-V1
+docker build -t devops-landing:v1.1 .
+docker ps                            # xac dinh container dang chay truoc khi dung
+docker stop landing-public
+docker rm landing-public
+docker run -d -p 8080:8080 \
+  --restart unless-stopped \
+  --name landing-public \
+  --network landing-net \
+  devops-landing:v1.1
+
+# Thay doi nhan biet duoc tren giao dien:
+#   v1.0 (MC-11): logo goc trai hien thi "DevOpsMaster"
+#   v1.1 (MC-12): logo goc trai hien thi "DevOpsMaster-V1"
+#
+# Ghi chu: container preview van giu devops-landing:v1.0 (MC-13), nen he thong
+# dong thoi chay 2 phien ban - dung mo hinh public/preview cua de bai.
+#
+# CHUA THUC HIEN: rollback v1.1 -> v1.0 (yeu cau 11 cua de).
+# Lenh rollback tuong ung:
+#   docker stop landing-public && docker rm landing-public
+#   docker run -d -p 8080:8080 --restart unless-stopped --name landing-public \
+#     --network landing-net devops-landing:v1.0

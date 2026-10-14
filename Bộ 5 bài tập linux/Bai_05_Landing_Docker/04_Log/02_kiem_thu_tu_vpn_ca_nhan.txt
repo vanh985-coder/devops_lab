@@ -1,0 +1,22 @@
+# Chep lai tu MC-08 va MC-09 - kiem thu tu VPN ca nhan
+
+C:\Users\Acer>curl ifconfig.me
+37.19.205.163
+
+C:\Users\Acer>curl http://103.216.118.115:8080
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Khóa Học DevOps Cho Người Mới Bắt Đầu | Master DevOps</title>
+    ... (da luoc)
+
+C:\Users\Acer>curl http://103.216.118.115:8081
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Khóa Học DevOps Cho Người Mới Bắt Đầu | Master DevOps</title>
+    ... (da luoc)
+
+# Ket qua: VPN ca nhan 37.19.205.163 truy cap duoc CA public (8080) va preview (8081).
+# Dung voi rule [4] cua ufw: ALLOW FWD 172.20.0.10 8080/tcp from 37.19.205.163.
+# Chua kiem thu SSH tu nguon nay trong Bai 5.

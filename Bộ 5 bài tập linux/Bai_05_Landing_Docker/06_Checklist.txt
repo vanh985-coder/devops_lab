@@ -1,0 +1,88 @@
+BÀI 5 - CHECKLIST KIỂM THỬ
+Sinh viên: Trần Đức Việt Anh | Server: maychucuavietanh | Ngày: 11/09/2026
+
+Quy ước trạng thái:
+  [PASS]    Đạt, có minh chứng kèm theo
+  [FAIL]    Không đạt theo minh chứng hiện có
+  [CHƯA MC] Chưa có minh chứng, chưa được tính là đạt
+
+----------------------------------------------------------------------
+A. NỘI DUNG LANDING PAGE
+----------------------------------------------------------------------
+[PASS]    01. Sản phẩm thương mại rõ ràng: khóa học DevOps             MC-11, MC-12
+[PASS]    02. Có phần giới thiệu và lời kêu gọi hành động               MC-11
+[CHƯA MC] 03. Đủ 6 thành phần bắt buộc (giới thiệu, lợi ích, đối tượng,
+              bảng giá, CTA, liên hệ): ảnh mới thấy phần đầu trang
+[CHƯA MC] 04. Nộp source landing page hoàn chỉnh
+[CHƯA MC] 05. Nộp prompt AI chính đã sử dụng
+[PASS]    06. Không tích hợp form gửi dữ liệu thật hay thanh toán       MC-06
+[PASS]    07. Không dùng Nginx/Apache; dùng busybox httpd tối giản      MC-01
+
+----------------------------------------------------------------------
+B. ĐÓNG GÓI DOCKER
+----------------------------------------------------------------------
+[PASS]    08. Thư mục dự án rõ ràng: ~/bai5/landing-page               MC-02, MC-13
+[CHƯA MC] 09. File mô tả dự án (README) trong thư mục
+[PASS]    10. Có Dockerfile, image tự build (không chỉ mount file)      MC-01
+[CHƯA MC] 11. Nộp bản sao Dockerfile thật (hiện mới có bản suy ra
+              từ docker history)                                        03_Cau_hinh
+[PASS]    12. Image nền chính thức: busybox:stable, 6.72MB              MC-01
+[PASS]    13. Hai phiên bản image v1.0 và v1.1                          MC-01, MC-13
+[PASS]    14. v1.1 có thay đổi nhận biết được trên giao diện            MC-11, MC-12
+[PASS]    15. Không đưa file VPN, key, mật khẩu vào image (chỉ có
+              index.html 20.5kB trên nền busybox)                       MC-01
+
+----------------------------------------------------------------------
+C. CHẠY CONTAINER VÀ PHÂN TÁCH TRUY CẬP
+----------------------------------------------------------------------
+[PASS]    16. Container public chạy cổng 8080                           MC-02
+[PASS]    17. Container preview chạy cổng 8081                          MC-02
+[PASS]    18. Cổng publish đúng trên host                               MC-02
+[FAIL]    19. Preview chỉ cho phép từ <VPN_SUBNET_LOP>: rule chỉ mở
+              cho 1 IP /32 (37.19.205.163), VPN giảng viên sẽ bị chặn   MC-03, Sự cố S2
+[FAIL]    20. SSH chỉ cho phép từ whitelist VPN của Bài 2: rule [1][2]
+              đang ALLOW IN từ Anywhere                                 MC-03, Sự cố S1
+[PASS]    21. Rule firewall dùng ALLOW FWD, đúng cơ chế của Docker      MC-03
+[CHƯA MC] 22. Chính sách mặc định inbound deny (ufw status verbose)
+
+----------------------------------------------------------------------
+D. VẬN HÀNH VÀ TÀI NGUYÊN
+----------------------------------------------------------------------
+[PASS]    23. Restart policy: container tự chạy lại sau khi restart
+              Docker service                                            MC-13
+[CHƯA MC] 24. Container tự hoạt động lại sau khi reboot server
+[CHƯA MC] 25. Giới hạn CPU/RAM cho container
+[CHƯA MC] 26. Kiểm tra mức dùng tài nguyên thực tế (docker stats)
+[CHƯA MC] 27. Kiểm tra docker logs, dung lượng log, vị trí lưu nội dung
+[CHƯA MC] 28. Sao lưu source/Dockerfile/image hoặc mô tả cách tái tạo
+
+----------------------------------------------------------------------
+E. KỊCH BẢN KIỂM THỬ BẮT BUỘC
+----------------------------------------------------------------------
+[PASS]    29. Từ Internet: vào được public                              MC-06
+[PASS]    30. Từ Internet: KHÔNG vào được preview                       MC-07
+[CHƯA MC] 31. Từ Internet: KHÔNG vào được SSH (chưa kiểm thử; theo
+              MC-03 thì SSH đang mở từ Anywhere nên nhiều khả năng vào được)
+[PASS]    32. Từ VPN cá nhân: vào được public                           MC-08
+[PASS]    33. Từ VPN cá nhân: vào được preview                          MC-09
+[CHƯA MC] 34. Từ VPN cá nhân: vào được SSH
+[CHƯA MC] 35. Từ VPN giảng viên: vào được preview và SSH
+[PASS]    36. Nguồn ngoài whitelist bị chặn ở preview, vào được public  MC-10
+[PASS]    37. Sau restart Docker: hai container hoạt động lại           MC-13
+[CHƯA MC] 38. Sau reboot server: public và preview trở lại hoạt động
+              mà không chạy lại lệnh triển khai thủ công
+[PASS]    39. Nâng cấp lên v1.1: giao diện thể hiện đúng phiên bản mới  MC-12
+[CHƯA MC] 40. Rollback về v1.0: hệ thống hoạt động, nội dung cũ khôi phục
+[CHƯA MC] 41. Khi dừng container public: xác định trạng thái và nguyên
+              nhân bằng lệnh Docker
+
+----------------------------------------------------------------------
+F. SẢN PHẨM NỘP
+----------------------------------------------------------------------
+[PASS]    42. Danh sách image/tag, container, port và chính sách        Mục 4, 03_Cau_hinh
+[PASS]    43. Ma trận kiểm thử từ Internet, VPN cá nhân, nguồn khác     Mục 5
+[PASS]    44. Minh chứng nâng cấp v1.0 lên v1.1                         MC-11, MC-12
+[PASS]    45. Checklist bàn giao server cho đội vận hành                Mục 7.2
+
+----------------------------------------------------------------------
+TỔNG HỢP: 45 tiêu chí | PASS 26 | FAIL 2 | CHƯA MC 17

@@ -1,0 +1,30 @@
+Sep 08 23:15:01 maychucuavietanh CRON[64883]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+Sep 08 23:15:01 maychucuavietanh CRON[64884]: (root) CMD (command -v debian-sa1 > /dev/null && debian-sa1 1 1)
+Sep 08 23:15:01 maychucuavietanh CRON[64883]: pam_unix(cron:session): session closed for user root
+Sep 08 23:17:01 maychucuavietanh CRON[64889]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+Sep 08 23:17:01 maychucuavietanh CRON[64890]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
+Sep 08 23:17:01 maychucuavietanh CRON[64889]: pam_unix(cron:session): session closed for user root
+Sep 08 23:18:36 maychucuavietanh root[64894]:   223  root (27.79.217.108) 08/09/26 23:18:36 clear
+Sep 08 23:18:54 maychucuavietanh root[64903]:   224  root (27.79.217.108) 08/09/26 23:18:39 dig @192.0.2.1 google.com
+Sep 08 23:19:04 maychucuavietanh root[64910]:   225  root (27.79.217.108) 08/09/26 23:19:04 dig @8.8.8.8 google.com
+Sep 08 23:19:29 maychucuavietanh root[64913]:   226  root (27.79.217.108) 08/09/26 23:19:27 ping -c3 8.8.8.8
+Sep 08 23:19:36 maychucuavietanh root[64916]:   227  root (27.79.217.108) 08/09/26 23:19:34 ping -c3 google.com
+Sep 08 23:20:20 maychucuavietanh systemd[1]: Starting sysstat-collect.service - system activity accounting tool...
+Sep 08 23:20:20 maychucuavietanh systemd[1]: sysstat-collect.service: Deactivated successfully.
+Sep 08 23:20:20 maychucuavietanh systemd[1]: Finished sysstat-collect.service - system activity accounting tool.
+Sep 08 23:20:29 maychucuavietanh root[64922]:   228  root (27.79.217.108) 08/09/26 23:20:29 clear
+Sep 08 23:20:33 maychucuavietanh root[64925]:   229  root (27.79.217.108) 08/09/26 23:20:33 ps aux
+Sep 08 23:22:10 maychucuavietanh root[64929]:   230  root (27.79.217.108) 08/09/26 23:22:10 ps aux head -6
+Sep 08 23:22:24 maychucuavietanh root[64933]:   231  root (27.79.217.108) 08/09/26 23:22:24 ps aux | head -6
+Sep 08 23:23:07 maychucuavietanh root[64937]:   232  root (27.79.217.108) 08/09/26 23:23:07 ps -o pid,ppid,user,%cpu,%mem,rss,etime,comm,args -p 1
+Sep 08 23:25:01 maychucuavietanh CRON[64940]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+Sep 08 23:25:01 maychucuavietanh CRON[64941]: (root) CMD (command -v debian-sa1 > /dev/null && debian-sa1 1 1)
+Sep 08 23:25:01 maychucuavietanh CRON[64940]: pam_unix(cron:session): session closed for user root
+Sep 08 23:25:16 maychucuavietanh root[64946]:   233  root (27.79.217.108) 08/09/26 23:25:06 journalctl
+Sep 08 23:25:16 maychucuavietanh root[64948]:   233  root (27.79.217.108) 08/09/26 23:25:06 journalctl
+Sep 08 23:25:16 maychucuavietanh root[64950]:   233  root (27.79.217.108) 08/09/26 23:25:06 journalctl
+Sep 08 23:25:16 maychucuavietanh root[64952]:   233  root (27.79.217.108) 08/09/26 23:25:06 journalctl
+Sep 08 23:25:16 maychucuavietanh root[64954]:   233  root (27.79.217.108) 08/09/26 23:25:06 journalctl
+Sep 08 23:25:18 maychucuavietanh root[64957]:   234  root (27.79.217.108) 08/09/26 23:25:18 clear
+Sep 08 23:25:41 maychucuavietanh chronyd[64816]: Selected source 185.125.190.56 (ntp.ubuntu.com)
+Sep 08 23:26:10 maychucuavietanh root[64963]:   235  root (27.79.217.108) 08/09/26 23:26:09 journalctl | tail -20
