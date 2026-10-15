@@ -11,7 +11,6 @@ Quay lại [README tổng](../README.md).
 | Môi trường | Bài 1–5: Ubuntu trong VMware (hostname `vietanh-VMware-Virtual-Platform`). Bài 8–9: VPS Ubuntu 24.04 (hostname `maychucuavietanh`) |
 | Công cụ | Docker 29.1.3, nginx, MySQL, Bash, `ss`, `systemctl` |
 | Đề bài | [DE-BAI.md](DE-BAI.md) · bản gốc [Đề bài.pdf](<Đề bài.pdf>) (ai5.vn, bài tập về nhà buổi 11) |
-| Báo cáo đầy đủ | [Bao_cao.pdf](Bao_cao.pdf) · [Bao_cao.docx](Bao_cao.docx) |
 | Kết luận kỹ thuật | [summary-buoi11.txt](summary-buoi11.txt) |
 
 ## Đã làm
@@ -111,6 +110,5 @@ Mình ghi ra để người đọc biết mình hiểu chỗ nào đã sai, thay
 | File / thư mục | Nội dung |
 |---|---|
 | [Đề bài.pdf](<Đề bài.pdf>) | Đề bài 9 bài của khóa học |
-| [Bao_cao.pdf](Bao_cao.pdf), [Bao_cao.docx](Bao_cao.docx) | Báo cáo đầy đủ, mỗi bài kèm ảnh chụp terminal |
 | [summary-buoi11.txt](summary-buoi11.txt) | Kết luận kỹ thuật Bài 9 |
-| [images/](images/) | Ảnh minh chứng được trích từ báo cáo |
+| [images/](images/) | Ảnh chụp terminal minh chứng cho từng bài |

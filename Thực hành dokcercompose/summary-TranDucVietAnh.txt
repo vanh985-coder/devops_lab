@@ -22,4 +22,6 @@ db: db:1433
 - Lỗi cách dòng
 - lỗi chưa thêm phần depends on vì có những dịch vụ phụ thuộc vào dịch vụ khác
 5. Nếu mở rộng tiếp, em sẽ thêm database / nginx / env / volume ra sao?
-- Nếu có dịch vụ đó sẵn thì em thêm tên vào service + image còn nếu không em sẽ viết dockerfile cho nó và đưa vào docker-compose.yml
+- Nếu mở rộng tiếp có thêm data_base hoặc volume thì em sẽ mount chúng với service db
+- Nếu có thêm ngnix thì em sẽ dùng reverse server để để điều hướng người dùng đến đúng port mà em mong muốn, tránh việc người dùng có thể truy cập trực tiếp cổng 8096 như trên
+- Trong

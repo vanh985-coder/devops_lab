@@ -2,7 +2,7 @@
 
 **Chủ đề:** Docker thực chiến với web app trên server Ubuntu
 
-*Nguồn: Học Viện Sáng Tạo, Khởi Nghiệp Từ Công Nghệ – ai5.vn. Bản gốc: [Đề bài.pdf](<Đề bài.pdf>)*
+[Đề bài.pdf](<Đề bài.pdf>)*
 
 ## Yêu cầu chung
 
