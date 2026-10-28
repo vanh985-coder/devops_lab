@@ -1,0 +1,36 @@
+BÀI 3 - SCRIPT HEALTH-CHECK CƠ BẢN CHO HỆ THỐNG DOCKER
+Họ tên: Trần Đức Việt Anh
+
+Script: health-check.sh (nằm trong repo devops-cicd-demo)
+Cách chạy:
+    chmod +x health-check.sh
+    ./health-check.sh                  # mặc định container cicd-demo-web, cổng 8080
+    ./health-check.sh <container> <cổng>
+
+Script kiểm tra 8 mục: user hiện tại, hostname, thời gian hệ thống, container đang chạy,
+20 dòng log gần nhất của app, cổng đang mở, response từ app, health endpoint.
+Nếu /health không trả HTTP 200 thì script thoát với mã 1.
+
+1. Script này giúp ích gì
+- Sau mỗi lần deploy chỉ cần một lệnh thay cho việc gõ tay từng lệnh, ai chạy cũng ra cùng một kết quả.
+- Cho biết nhanh đang đứng trên server nào, user nào, giờ nào (tránh kiểm tra nhầm server).
+- Gom trạng thái container, log, cổng, response vào một chỗ nên khoanh vùng lỗi nhanh hơn.
+- Mã thoát khác 0 khi health fail nên có thể gọi trong pipeline hoặc cron.
+
+2. Nếu mở rộng tiếp em sẽ thêm gì
+- Kiểm tra RAM, CPU, dung lượng đĩa (free -h, df -h).
+- Kiểm tra trạng thái healthy/unhealthy và RestartCount của từng container.
+- Chạy curl nhiều lần để thống kê tỉ lệ lỗi và thời gian phản hồi.
+- Kiểm tra hạn chứng chỉ SSL và DNS của domain.
+- Gửi cảnh báo qua Telegram/Slack khi fail, và chạy định kỳ bằng cron hoặc gọi từ GitHub Actions.
+
+3. 5 lỗi kỹ thuật script này có thể phát hiện
+1. Container bị dừng hoặc không tồn tại: không thấy trong docker ps.
+2. App không lắng nghe đúng cổng: ss không thấy cổng, curl không kết nối được.
+3. App trả mã lỗi (500, 502...): bước 7 hiển thị HTTP code khác 200.
+4. Health endpoint fail: bước 8 báo FAIL và script thoát mã 1.
+5. App có lỗi trong log (exception, connection refused tới DB): thấy ở 20 dòng log gần nhất.
+   (Có thể thêm: chạy nhầm server, vì script in hostname và user.)
+
+[Phần nộp: dán nội dung script, ảnh chmod +x, ảnh chạy script và kết quả]
+[Kết quả chạy thật: <...>]

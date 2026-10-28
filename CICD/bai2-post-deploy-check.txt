@@ -1,0 +1,77 @@
+BÀI 2 - PHÁT HIỆN LỖI SAU DEPLOY BẰNG LOG VÀ HEALTH CHECK
+Họ tên: Trần Đức Việt Anh
+
+TÌNH HUỐNG
+Workflow GitHub Actions xanh, container vẫn Up, nhưng người dùng vào web lúc được lúc lỗi.
+"Xanh" chỉ cho biết các lệnh deploy chạy xong, không chứng minh app phục vụ được request.
+Vì vậy phải kiểm tra theo từng lớp, từ ngoài vào trong.
+
+SƠ ĐỒ LUỒNG KIỂM TRA SAU DEPLOY (vẽ lại thành ảnh để nộp, ví dụ bằng draw.io)
+
+  Dev ──push──> GitHub Actions ──SSH──> Server
+                (Nơi xem log pipeline)     │
+                                           ▼
+                                  ┌─────────────────┐
+  Người dùng ──HTTP──> [Nginx] ──> │ Docker container │
+                          │        │   App (cổng 8080)│
+                          │        └─────────────────┘
+                          │                 │
+         Log nginx:       │                 └─ Log app: docker logs <container>
+         /var/log/nginx/  │                 └─ Check health: curl /health
+         access.log       │                 └─ Trạng thái: docker ps / compose ps
+         error.log        └─ Kiểm tra cổng: ss -tlnp
+
+  Nơi có log     : GitHub Actions (tab Actions), nginx (access/error.log), app (docker logs)
+  Nơi check health: curl /health trên server, HEALTHCHECK của container (docker ps)
+
+TRÌNH TỰ KIỂM TRA VÀ CÂU LỆNH
+Bước 0. Xem log workflow trên GitHub: bước nào chạy, deploy có đúng commit không.
+Bước 1. Container
+        docker compose ps
+        docker ps -a
+        docker inspect --format '{{.State.Health.Status}} restarts={{.RestartCount}}' <container>
+        -> Chú ý: trạng thái "Up" nhưng "(unhealthy)" hoặc RestartCount tăng liên tục là dấu hiệu bất thường.
+Bước 2. Log app
+        docker compose logs --tail=50 <service>
+        docker logs -f --since 5m <container>
+Bước 3. Log nginx (nếu có nginx riêng trên host hoặc trong container)
+        sudo tail -n 50 /var/log/nginx/error.log
+        sudo tail -n 50 /var/log/nginx/access.log
+        -> Tìm 502, 504, upstream timed out, connect() failed.
+Bước 4. Cổng
+        ss -tlnp | grep -E '80|443|8080'
+        -> App/nginx có thực sự LISTEN, đúng cổng không.
+Bước 5. Response bằng curl
+        curl -i http://localhost:8080/
+        for i in $(seq 1 20); do curl -s -o /dev/null -w "%{http_code} %{time_total}s\n" http://localhost:8080/; done
+        -> Chạy lặp nhiều lần để bắt lỗi "lúc được lúc không", xem mã lỗi xen kẽ hoặc thời gian phản hồi thất thường.
+Bước 6. Health endpoint
+        curl -i http://localhost:8080/health
+Bước 7. Từ ngoài vào (đi qua domain/Cloudflare nếu có)
+        curl -I https://<domain>
+        -> Nếu bên trong tốt mà bên ngoài lỗi, lỗi nằm ở DNS, Cloudflare, firewall hoặc nginx bên ngoài.
+
+ÍT NHẤT 5 NGUYÊN NHÂN LỖI CÓ THỂ GẶP
+1. App khởi động chậm hoặc crash rồi restart: container luôn "Up" nhưng có lúc app chưa sẵn sàng.
+   Dấu hiệu: RestartCount tăng, log có stack trace. Cách xử lý: thêm healthcheck và depends_on điều kiện.
+2. Nginx trỏ sai upstream (sai cổng, sai tên service): gây 502 Bad Gateway.
+   Dấu hiệu: error.log có "connect() failed" hoặc "upstream timed out".
+3. Có nhiều container/phiên bản cũ cùng chạy hoặc cùng bind một cổng: request rơi vào bản cũ lúc có lúc không.
+   Dấu hiệu: docker ps thấy 2 container, nội dung trả về khác nhau giữa các lần curl.
+4. Biến môi trường, file cấu hình hoặc database sai sau deploy: app chạy nhưng vài route lỗi 500.
+   Dấu hiệu: log app báo lỗi kết nối DB hoặc thiếu biến.
+5. Thiếu tài nguyên (RAM/CPU/đĩa đầy): app bị OOM kill hoặc chậm.
+   Dấu hiệu: docker stats, free -h, df -h, dmesg | grep -i oom.
+6. Cloudflare/DNS/SSL mode sai hoặc firewall chặn cổng: người dùng ngoài vào lỗi (521, 522, 525...) dù server nội bộ tốt.
+7. Cache: người dùng thấy bản cũ hoặc mới xen kẽ do CDN/trình duyệt cache.
+
+KẾT LUẬN NGẮN
+Pipeline xanh chưa đủ. Sau deploy phải xác nhận theo tầng:
+container (có healthy không) -> log app -> log nginx -> cổng -> curl lặp nhiều lần -> health -> truy cập từ ngoài.
+Lỗi "lúc được lúc không" thường nằm ở app chưa sẵn sàng hoặc restart liên tục, nginx upstream sai,
+hoặc có nhiều bản container chạy song song. Cách xác định: curl lặp 20 lần, đối chiếu mã lỗi
+với access.log/error.log và log app theo thời gian.
+Nếu có lỗi, bổ sung bước health check vào cuối workflow để pipeline đỏ ngay khi app không khỏe.
+
+[Phần thực hành: chụp ảnh các lệnh trên chạy trên server của em (docker compose ps, logs, ss, curl lặp, curl /health)]
+[Ghi lại kết quả thật của em ở đây: <...>]

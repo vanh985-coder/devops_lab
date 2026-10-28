@@ -1,0 +1,40 @@
+BÀI 1 - DỰNG LUỒNG CI/CD CƠ BẢN CHO APP DOCKER
+Họ tên: Trần Đức Việt Anh
+
+[Các mục có dấu <...> là chỗ phải điền sau khi làm thật trên server, rồi xóa dấu <>]
+
+1. Repo tên gì
+- Tên repo: devops-cicd-demo
+- Link: <https://github.com/.../devops-cicd-demo>
+- Nội dung: app web tĩnh chạy bằng nginx trong Docker Compose, có endpoint /health.
+  Gồm docker-compose.yml, nginx.conf, index.html, .github/workflows/deploy.yml.
+
+2. Workflow làm gì
+- File: .github/workflows/deploy.yml, tên "Deploy to server".
+- Chạy khi push lên nhánh main (và có thể chạy tay bằng workflow_dispatch).
+- Dùng appleboy/ssh-action để SSH vào server bằng private key lưu trong GitHub Secrets.
+- Secrets đã tạo: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY (private key không nằm trong repo).
+
+3. Pipeline chạy các bước nào
+  Bước 1: Dev push commit lên main.
+  Bước 2: GitHub Actions khởi động job "deploy" trên runner ubuntu-latest.
+  Bước 3: Runner SSH vào server bằng key (public key nằm trong ~/.ssh/authorized_keys).
+  Bước 4: Trên server: cd /opt/cicd-demo, git pull origin main.
+  Bước 5: docker compose up -d --build để cập nhật container.
+  Bước 6: docker compose ps, rồi curl -fsS http://localhost:8080/health.
+          Nếu health không trả 200 thì lệnh lỗi, pipeline đỏ.
+
+4. Deploy thành công hay chưa
+- <Thành công / chưa. Ghi rõ lần chạy nào, commit nào, đã sửa lỗi gì nếu có.>
+
+5. Đã verify bằng những lệnh nào
+- docker compose ps        -> <container cicd-demo-web trạng thái Up (healthy)>
+- docker compose logs --tail=30   -> <log nginx nhận request, không có lỗi>
+- curl -i http://localhost:8080/       -> <HTTP 200, thấy nội dung phiên bản mới>
+- curl -i http://localhost:8080/health -> <HTTP 200, body "ok">
+
+6. Em rút ra được gì
+- <Ví dụ: key SSH chỉ cần quyền đúng; script_stop giúp pipeline đỏ khi lệnh trên server lỗi; ...>
+
+Ảnh đính kèm: repo, file workflow, trang Secrets, log workflow xanh,
+docker compose ps, docker compose logs, curl.

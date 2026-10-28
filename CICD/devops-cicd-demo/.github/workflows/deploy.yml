@@ -1,0 +1,29 @@
+name: Deploy to server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH vào server, cập nhật code và chạy lại compose
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # port: 22   # bỏ comment và sửa nếu SSH của server không dùng cổng 22
+          script_stop: true
+          script: |
+            set -e
+            cd /opt/cicd-demo
+            git pull origin main
+            docker compose up -d --build
+            sleep 5
+            echo "--- docker compose ps ---"
+            docker compose ps
+            echo "--- health check ---"
+            curl -fsS http://localhost:8080/health
