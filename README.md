@@ -21,6 +21,7 @@ Sắp theo thứ tự mình học:
 | 3 | [Docker cơ bản](<Thực hành cơ bản với docker/>) | 9 bài: nginx + bind mount, MySQL + volume, kiểm tra container, sơ đồ hệ thống, script health-check, tiếp nhận một server đang chạy web app | Ubuntu VM và VPS | Ảnh chụp từng bài, kết luận kỹ thuật |
 | 4 | [Docker Compose](<Thực hành dokcercompose/>) | Spring Boot + SQL Server: Dockerfile multi-stage, 3 service, healthcheck, `depends_on` có điều kiện | Ubuntu server | Sơ đồ, `docker compose ps`, log từng service |
 | 5 | [Tổng hợp kiến thức](<Tổng hợp kiến thức áp dụng vào hệ thống/>) | 3 câu tình huống: lỗi 502 qua Cloudflare → Nginx → Docker, Dockerfile production, audit và thiết kế lại mức độ phơi bày | Bài làm theo hướng tư duy, chưa chạy trên server | Sơ đồ, cấu hình, checklist 11 bước |
+| 6 | [CI/CD](<CICD/>) | GitHub Actions cho app Spring Boot: CI build + test Maven, CD build image đẩy GHCR rồi deploy qua SSH, health check sau deploy | GitHub Actions + VPS | Workflow, log Actions, `docker compose ps`, `curl` |
 
 ### Nếu chỉ có vài phút, đọc 3 phần này
 
@@ -36,6 +37,7 @@ Sắp theo thứ tự mình học:
 | Mạng và firewall | `ip`, `ss`, DNS, route, UFW whitelist/blacklist, phân biệt DROP và REJECT |
 | Bảo mật vận hành | Phân tích log SSH, phát hiện dò mật khẩu, Fail2ban, đặc quyền tối thiểu, giảm bề mặt phơi bày |
 | Docker | Dockerfile (multi-stage, non-root, cache layer), tag phiên bản, publish cổng, volume, restart policy, tương tác Docker với firewall |
+| CI/CD | GitHub Actions (CI/CD tách riêng, `workflow_run`), GHCR, deploy qua SSH, GitHub Secrets, health check sau deploy |
 | Docker Compose | Nhiều service, `healthcheck`, `depends_on` theo điều kiện, biến môi trường, volume, network nội bộ |
 | Web / hạ tầng | Cloudflare (Proxy, SSL/TLS mode), Nginx reverse proxy, chẩn đoán 502 theo chuỗi từ ngoài vào trong |
 | Công cụ | Git, Bash, `grep`/`awk`/`find`, SSH, VMware |
@@ -57,7 +59,8 @@ devops-lab/
 │   └── Bai_0X_*/                          #   README, báo cáo, lệnh, cấu hình, log, minh chứng, checklist
 ├── Thực hành cơ bản với docker/           # 9 bài Docker
 ├── Thực hành dokcercompose/               # Spring Boot + SQL Server bằng Compose
-└── Tổng hợp kiến thức áp dụng vào hệ thống/  # 3 câu tình huống Cloudflare / Nginx / Docker
+├── Tổng hợp kiến thức áp dụng vào hệ thống/  # 3 câu tình huống Cloudflare / Nginx / Docker
+└── CICD/                                  # GitHub Actions CI/CD + GHCR, bài tập K8s
 ```
 
 ## Liên hệ
