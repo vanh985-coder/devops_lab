@@ -47,10 +47,14 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 
 | Kiểm tra | Lệnh | Kết quả |
 |---|---|---|
-| Workflow CI | Tab Actions | _chưa cập nhật_ |
-| Workflow CD | Tab Actions | _chưa cập nhật_ |
+| Workflow CI | Tab Actions | Java CI #10 xanh trên commit `4a37cac` (58s) |
+| Workflow CD | Tab Actions | Java CD #6 tự chạy sau CI và xanh (1m34s); CD #4, #5 fail ở bước SSH trước đó |
 | Container | `docker compose ps` | _chưa cập nhật_ |
 | Log app | `docker compose logs --tail=30 app` | _chưa cập nhật_ |
+
+![Danh sách lần chạy CI/CD](minh_chung/MC-01_actions_ci_cd_xanh.png)
+
+**Sự cố đã gặp:** CI fail vì test Spring context cần database, sửa bằng service container SQL Server trong `ci.yml`. CD fail ở bước SSH, đang tạm dùng mật khẩu, cần chuyển lại SSH key.
 | Response | `curl -i http://localhost:18096/` | _chưa cập nhật_ |
 
 ## Còn dang dở

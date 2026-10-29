@@ -42,7 +42,14 @@ Em chia thành 2 workflow:
           Nếu app không trả lời thì lệnh lỗi, pipeline đỏ (có set -e).
 
 4. Deploy thành công hay chưa
-- <Thành công / chưa. Ghi rõ commit nào, link lần chạy Actions, đã sửa lỗi gì nếu có.>
+- Thành công. Commit 4a37cac (merge PR #3 vào main): Java CI #10 xanh (58s),
+  sau đó Java CD #6 tự chạy và xanh (1m34s). Ảnh: minh_chung/MC-01_actions_ci_cd_xanh.png
+- Các lỗi đã gặp trước khi thành công:
+  + Java CI fail ở bước test vì test Spring context cần kết nối database, trên runner không có
+    SQL Server. Sửa: thêm SQL Server làm service container trong ci.yml (PR #2).
+  + Java CD #4, #5 fail ở bước SSH vào server. <Ghi nguyên nhân cụ thể từ log>.
+    Tạm thời đổi sang đăng nhập SSH bằng mật khẩu (PR #3) thì CD #6 chạy được.
+    <Cần quay lại dùng SSH key theo đúng yêu cầu đề, ghi kết quả sau khi sửa>
 
 5. Đã verify bằng những lệnh nào (chạy trên server, trong thư mục FASTSHOP/net)
 - docker compose ps                    -> <app trạng thái Up, đúng image tag = commit SHA>
