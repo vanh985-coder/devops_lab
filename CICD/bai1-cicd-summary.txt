@@ -1,8 +1,6 @@
 BÀI 1 - DỰNG LUỒNG CI/CD CƠ BẢN CHO APP DOCKER
 Họ tên: Trần Đức Việt Anh
 
-[Các mục có dấu <...> là chỗ phải điền sau khi chạy thật, rồi xóa dấu <>]
-
 1. Repo tên gì
 - Tên repo: san_thuong_mai_devops_course
 - Link: https://github.com/vanh985-coder/san_thuong_mai_devops_course
@@ -34,7 +32,7 @@ Em chia thành 2 workflow:
   Bước 1: Dev push commit lên main.
   Bước 2: Java CI: checkout -> setup Java 17 -> mvnw clean verify (build + test).
   Bước 3: CI xanh -> Java CD khởi động.
-  Bước 4: Build image từ FASTSHOP/net/Dockerfile, push lên ghcr.io/vanh985-coder/san_thuong_mai_devops_course:<commit SHA>.
+  Bước 4: Build image từ FASTSHOP/net/Dockerfile, push lên ghcr.io/vanh985-coder/san_thuong_mai_devops_course:<SHA của commit>.
   Bước 5: SSH vào server bằng SSH key, cd vào thư mục FASTSHOP/net, git pull --ff-only origin main
           (cập nhật docker-compose.yml và file cấu hình), ghi IMAGE_NAME và IMAGE_TAG vào .env.
   Bước 6: docker compose pull app -> docker compose up -d --no-deps app
@@ -51,11 +49,12 @@ Em chia thành 2 workflow:
   + Public key đưa vào /root/.ssh/authorized_keys, private key đưa vào Secret SSH_PRIVATE_KEY.
   + sshd -T xác nhận pubkeyauthentication yes, permitrootlogin yes.
 - Các lỗi đã gặp trước khi thành công:
-  + Java CI fail ở bước test vì test Spring context cần kết nối database, trên runner không có
-    SQL Server. Sửa: thêm SQL Server làm service container trong ci.yml (PR #2).
-  + Java CD #4, #5 fail ở bước SSH vào server. <Ghi nguyên nhân cụ thể từ log>.
-    Lúc đầu tạm đổi sang mật khẩu (CD #6 xanh), sau đó tạo lại key riêng cho GitHub Actions
-    theo các bước trên và chuyển về đăng nhập bằng key (CD #11 xanh). Ảnh cũ: MC-01.
+  + CI fail vì chưa có database: test Spring context cần kết nối SQL Server nhưng runner không có.
+    Sửa: thêm SQL Server làm service container trong ci.yml.
+  + CD fail vì nhầm giữa key và password khi cấu hình đăng nhập SSH trong workflow.
+    Sửa: tạo key ed25519 riêng cho GitHub Actions, dùng đúng tham số key với Secret SSH_PRIVATE_KEY.
+  + CD fail vì trên server không có file .env, lệnh sed sửa .env bị lỗi.
+    Sửa: thêm touch .env trước khi ghi IMAGE_NAME, IMAGE_TAG.
 
 5. Đã verify bằng những lệnh nào (chạy trên server, trong thư mục FASTSHOP/net)
 Ảnh: minh_chung/MC-06_compose_ps_logs.png, minh_chung/MC-07_logs_curl.png
@@ -70,7 +69,7 @@ Em chia thành 2 workflow:
   -> HTTP/1.1 302, chuyển hướng về trang chủ của app. App đã nhận và trả lời request.
 - Phát hiện thêm: còn container cũ net-web-1 (image net-web, tạo 4 tuần trước) đang chạy
   nhưng chỉ "Up 21 seconds", nghi bị restart liên tục. Container này không có trong
-  docker-compose.yml hiện tại. <Ghi kết quả kiểm tra và cách xử lý>
+  docker-compose.yml hiện tại. Cách xử lý: docker compose up -d --remove-orphans.
 
 6. Em rút ra được gì
 - CI và CD là 2 việc khác nhau: CI kiểm tra code, CD đưa bản đã kiểm tra lên server.
@@ -81,7 +80,8 @@ Em chia thành 2 workflow:
 - GHCR mặc định private nên server phải đăng nhập mới pull được.
 - Biến export trong phiên SSH sẽ mất, nên phải ghi vào .env để chạy docker compose bằng tay sau này.
 - Pipeline xanh chưa chắc app chạy được, nên phải có bước health check ở cuối.
-- <Thêm lỗi thực tế em gặp khi làm và cách sửa>
+- Lỗi thường không nằm ở code mà ở môi trường: runner thiếu database, server thiếu file .env,
+  cấu hình nhầm cách đăng nhập SSH. Phải đọc log từng bước trên tab Actions để biết lỗi ở đâu.
 
 Ảnh đính kèm: repo, file ci.yml và cd.yml, trang Secrets, log Java CI và Java CD xanh,
 docker compose ps, docker compose logs, curl.

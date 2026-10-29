@@ -42,6 +42,7 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 - **GHCR mặc định private:** server phải `docker login ghcr.io` bằng token có quyền `read:packages`, nếu không `pull` báo `denied`.
 - **`docker-compose.yml` phải dùng `image:` chứ không `build:`**, nếu không bước pull vô tác dụng.
 - **Biến `export` trong phiên SSH của workflow mất khi phiên kết thúc**, nên phải lưu vào `.env` để vận hành tay sau đó.
+- **Lỗi CI/CD thường nằm ở môi trường chứ không ở code**: runner thiếu database, server thiếu file, cấu hình đăng nhập sai. Phải đọc log từng bước trên tab Actions.
 - **Thực tế doanh nghiệp thường build image trên CI rồi đẩy lên registry**; build trực tiếp trên server chỉ hợp với dự án nhỏ một server.
 
 ## Kết quả
@@ -63,8 +64,9 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 | Mã | Vấn đề | Xử lý | Trạng thái |
 |---|---|---|---|
 | S1 | CI fail: test Spring context cần database, runner không có SQL Server | Thêm SQL Server làm service container trong `ci.yml`, có healthcheck | Đã sửa |
-| S2 | CD #4, #5 fail ở bước SSH | Tạm dùng mật khẩu, sau đó tạo key ed25519 riêng cho Actions, kiểm tra `sshd -T`, chuyển về key | Đã sửa |
-| S3 | Container cũ `net-web-1` (tạo 4 tuần trước, không còn trong compose) vẫn chạy và chỉ "Up 21 seconds", nghi restart liên tục, tốn RAM | Kiểm tra `RestartCount` và log, xóa bằng `--remove-orphans` | Chưa xử lý |
+| S2 | CD fail do nhầm giữa key và password khi cấu hình đăng nhập SSH | Tạo key ed25519 riêng cho Actions, kiểm tra `sshd -T`, dùng đúng tham số `key` | Đã sửa |
+| S3 | CD fail vì server không có file `.env`, lệnh `sed -i` lỗi | Thêm `touch .env` trước khi ghi tag image | Đã sửa |
+| S4 | Container cũ `net-web-1` (tạo 4 tuần trước, không còn trong compose) vẫn chạy và chỉ "Up 21 seconds", nghi restart liên tục, tốn RAM | Kiểm tra `RestartCount` và log, xóa bằng `--remove-orphans` | Chưa xử lý |
 
 ## Còn dang dở
 
