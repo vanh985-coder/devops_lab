@@ -1,0 +1,70 @@
+name: Java CD
+
+on:
+  workflow_run:
+    workflows: ["Java CI"]      
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set image name
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./FASTSHOP/net
+          file: ./FASTSHOP/net/Dockerfile
+          push: true
+          tags: ${{ steps.image.outputs.name }}:${{ github.event.workflow_run.head_sha }}
+
+      - name: Deploy to production
+        uses: appleboy/ssh-action@v1
+        env:
+          IMAGE_NAME: ${{ steps.image.outputs.name }}
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: IMAGE_NAME,IMAGE_TAG
+          script: |
+            set -e
+            cd /root/TranDucVietAnh-compose-app/san_thuong_mai_devops_course/FASTSHOP/net
+            # cập nhật docker-compose.yml và các file cấu hình trên server theo main
+            git pull --ff-only origin main
+            # lưu tag vào .env (giữ nguyên các biến khác như mật khẩu DB)
+            touch .env
+            sed -i '/^IMAGE_NAME=/d;/^IMAGE_TAG=/d' .env
+            echo "IMAGE_NAME=$IMAGE_NAME" >> .env
+            echo "IMAGE_TAG=$IMAGE_TAG" >> .env
+            docker compose pull app
+            docker compose up -d --no-deps app
+            docker image prune -f
+            echo "--- docker compose ps ---"
+            docker compose ps
+            echo "--- health check ---"
+            curl -fsS --retry 20 --retry-delay 5 --retry-all-errors http://localhost:18096/

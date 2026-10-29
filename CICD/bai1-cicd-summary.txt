@@ -35,21 +35,27 @@ Em chia thành 2 workflow:
   Bước 2: Java CI: checkout -> setup Java 17 -> mvnw clean verify (build + test).
   Bước 3: CI xanh -> Java CD khởi động.
   Bước 4: Build image từ FASTSHOP/net/Dockerfile, push lên ghcr.io/vanh985-coder/san_thuong_mai_devops_course:<commit SHA>.
-  Bước 5: SSH vào server, cd vào thư mục FASTSHOP/net, ghi IMAGE_NAME và IMAGE_TAG vào .env.
+  Bước 5: SSH vào server bằng SSH key, cd vào thư mục FASTSHOP/net, git pull --ff-only origin main
+          (cập nhật docker-compose.yml và file cấu hình), ghi IMAGE_NAME và IMAGE_TAG vào .env.
   Bước 6: docker compose pull app -> docker compose up -d --no-deps app
           (chỉ khởi động lại app, không đụng database) -> docker image prune -f.
   Bước 7: docker compose ps, rồi curl http://localhost:18096/ (thử lại nhiều lần vì Java khởi động chậm).
           Nếu app không trả lời thì lệnh lỗi, pipeline đỏ (có set -e).
 
 4. Deploy thành công hay chưa
-- Thành công. Commit 4a37cac (merge PR #3 vào main): Java CI #10 xanh (58s),
-  sau đó Java CD #6 tự chạy và xanh (1m34s). Ảnh: minh_chung/MC-01_actions_ci_cd_xanh.png
+- Thành công, đăng nhập server bằng SSH key.
+  Commit 11f5f05: Java CI #17 xanh (53s), sau đó Java CD #11 tự chạy và xanh (1m34s).
+  Ảnh: minh_chung/MC-05_ci_cd_xanh_bang_ssh_key.png
+- Cách tạo key (ảnh MC-02, MC-03, MC-04):
+  + ssh-keygen -t ed25519 -f ~/.ssh/fastshop_deploy -N "" -C "github-actions-fastshop"
+  + Public key đưa vào /root/.ssh/authorized_keys, private key đưa vào Secret SSH_PRIVATE_KEY.
+  + sshd -T xác nhận pubkeyauthentication yes, permitrootlogin yes.
 - Các lỗi đã gặp trước khi thành công:
   + Java CI fail ở bước test vì test Spring context cần kết nối database, trên runner không có
     SQL Server. Sửa: thêm SQL Server làm service container trong ci.yml (PR #2).
   + Java CD #4, #5 fail ở bước SSH vào server. <Ghi nguyên nhân cụ thể từ log>.
-    Tạm thời đổi sang đăng nhập SSH bằng mật khẩu (PR #3) thì CD #6 chạy được.
-    <Cần quay lại dùng SSH key theo đúng yêu cầu đề, ghi kết quả sau khi sửa>
+    Lúc đầu tạm đổi sang mật khẩu (CD #6 xanh), sau đó tạo lại key riêng cho GitHub Actions
+    theo các bước trên và chuyển về đăng nhập bằng key (CD #11 xanh). Ảnh cũ: MC-01.
 
 5. Đã verify bằng những lệnh nào (chạy trên server, trong thư mục FASTSHOP/net)
 - docker compose ps                    -> <app trạng thái Up, đúng image tag = commit SHA>

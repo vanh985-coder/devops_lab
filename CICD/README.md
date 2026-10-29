@@ -21,7 +21,8 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 - **Workflow CI (`Java CI`)** chạy khi push hoặc mở pull request vào `dev`/`main`: cài Java 17 (Temurin, có cache Maven), chạy `./mvnw clean verify` để build và chạy test.
 - **Workflow CD (`Java CD`)** chỉ chạy **sau khi CI xanh trên `main`** (`workflow_run` + điều kiện `conclusion == 'success'`), nên code test fail không bao giờ lên production.
 - **Build image trên GitHub Actions và đẩy lên GHCR**, tag bằng commit SHA thay vì `latest`. Server không phải build, chỉ pull image.
-- **Deploy qua SSH** bằng `appleboy/ssh-action`, private key nằm trong GitHub Secrets (`SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`), public key trong `authorized_keys` của server.
+- **Deploy qua SSH** bằng `appleboy/ssh-action`, private key nằm trong GitHub Secrets (`SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`), public key trong `authorized_keys` của server. Key ed25519 tạo riêng cho GitHub Actions, không dùng mật khẩu.
+- **Đồng bộ cấu hình trên server** bằng `git pull --ff-only` trước khi deploy, nên sửa `docker-compose.yml` trên `main` cũng tự lên server.
 - **Chỉ khởi động lại service `app`** (`--no-deps`), không đụng tới database.
 - **Ghi tag image vào `.env`** trên server để các lệnh `docker compose ps/logs` gõ tay sau này vẫn chạy đúng, và không ghi đè các biến khác (mật khẩu DB).
 - **Kiểm tra sau deploy ngay trong pipeline:** `set -e`, `docker compose ps`, `curl` có retry tới app. App không lên thì pipeline đỏ.
@@ -47,19 +48,24 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 
 | Kiểm tra | Lệnh | Kết quả |
 |---|---|---|
-| Workflow CI | Tab Actions | Java CI #10 xanh trên commit `4a37cac` (58s) |
-| Workflow CD | Tab Actions | Java CD #6 tự chạy sau CI và xanh (1m34s); CD #4, #5 fail ở bước SSH trước đó |
+| Workflow CI | Tab Actions | Java CI #17 xanh trên commit `11f5f05` (53s) |
+| Workflow CD | Tab Actions | Java CD #11 tự chạy sau CI, đăng nhập bằng SSH key, xanh (1m34s) |
 | Container | `docker compose ps` | _chưa cập nhật_ |
 | Log app | `docker compose logs --tail=30 app` | _chưa cập nhật_ |
-
-![Danh sách lần chạy CI/CD](minh_chung/MC-01_actions_ci_cd_xanh.png)
-
-**Sự cố đã gặp:** CI fail vì test Spring context cần database, sửa bằng service container SQL Server trong `ci.yml`. CD fail ở bước SSH, đang tạm dùng mật khẩu, cần chuyển lại SSH key.
 | Response | `curl -i http://localhost:18096/` | _chưa cập nhật_ |
+
+![CI/CD chạy xanh bằng SSH key](minh_chung/MC-05_ci_cd_xanh_bang_ssh_key.png)
+
+## Sự cố ghi nhận
+
+| Mã | Vấn đề | Xử lý | Trạng thái |
+|---|---|---|---|
+| S1 | CI fail: test Spring context cần database, runner không có SQL Server | Thêm SQL Server làm service container trong `ci.yml`, có healthcheck | Đã sửa |
+| S2 | CD #4, #5 fail ở bước SSH | Tạm dùng mật khẩu, sau đó tạo key ed25519 riêng cho Actions, kiểm tra `sshd -T`, chuyển về key | Đã sửa |
 
 ## Còn dang dở
 
-Ảnh minh chứng (repo, file workflow, Secrets, log Actions xanh, `docker compose ps/logs`, `curl`), điền kết quả thật vào `bai1-cicd-summary.txt`, Bài 2 (checklist sau deploy), Bài 3 (script health-check), Bài 4–5 (Kubernetes).
+Ảnh `docker compose ps/logs`, `curl` trên server và trang Secrets; xóa Secret `SSH_PASSWORD` không còn dùng; Bài 2 (checklist sau deploy), Bài 3 (script health-check), Bài 4–5 (Kubernetes).
 
 ## Hồ sơ
 
@@ -67,6 +73,8 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 |---|---|
 | [BÀI TẬP VỀ NHÀ_CICD_K8S.pdf](<BÀI TẬP VỀ NHÀ_CICD_K8S.pdf>) | Đề bài 5 bài CI/CD và Kubernetes |
 | [bai1-cicd-summary.txt](bai1-cicd-summary.txt) | Tóm tắt Bài 1 |
+| [cau_hinh/](cau_hinh/) | `ci.yml`, `cd.yml` đang chạy trên repo FASTSHOP |
+| [minh_chung/](minh_chung/) | Ảnh `MC-01` đến `MC-05`: lần chạy Actions, tạo SSH key, cấu hình `sshd` |
 | [bai2-post-deploy-check.txt](bai2-post-deploy-check.txt) | Checklist kiểm tra sau deploy |
 | [bai3-healthcheck-note.txt](bai3-healthcheck-note.txt) | Ghi chú script health-check |
 | [devops-cicd-demo/](devops-cicd-demo/) | Repo mẫu nginx dùng để thử luồng ban đầu, kèm `health-check.sh` |
