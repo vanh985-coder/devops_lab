@@ -58,10 +58,19 @@ Em chia thành 2 workflow:
     theo các bước trên và chuyển về đăng nhập bằng key (CD #11 xanh). Ảnh cũ: MC-01.
 
 5. Đã verify bằng những lệnh nào (chạy trên server, trong thư mục FASTSHOP/net)
-- docker compose ps                    -> <app trạng thái Up, đúng image tag = commit SHA>
-- docker compose logs --tail=30 app    -> <Spring Boot "Started ... in ... seconds", không lỗi>
-- curl -i http://localhost:18096/      -> <HTTP 200 hoặc 302>
-- grep IMAGE_TAG .env                  -> <đúng SHA của commit vừa push>
+Ảnh: minh_chung/MC-06_compose_ps_logs.png, minh_chung/MC-07_logs_curl.png
+- docker compose ps
+  -> net-app-1 chạy image ghcr.io/vanh985-coder/san_thuong_mai_devops_course:11f5f05...,
+     đúng SHA của commit vừa push, trạng thái Up 3 minutes, cổng 18096->8080.
+     db và cadvisor (healthy), các service còn lại Up 30 giờ, không bị khởi động lại khi deploy app.
+- docker compose logs --tail=30 app
+  -> "Started NetApplication in 3.117 seconds", Tomcat chạy cổng 8080, kết nối database
+     thành công (HikariPool-1 - Start completed). Chỉ có WARN cấu hình, không có ERROR.
+- curl -i http://localhost:18096/
+  -> HTTP/1.1 302, chuyển hướng về trang chủ của app. App đã nhận và trả lời request.
+- Phát hiện thêm: còn container cũ net-web-1 (image net-web, tạo 4 tuần trước) đang chạy
+  nhưng chỉ "Up 21 seconds", nghi bị restart liên tục. Container này không có trong
+  docker-compose.yml hiện tại. <Ghi kết quả kiểm tra và cách xử lý>
 
 6. Em rút ra được gì
 - CI và CD là 2 việc khác nhau: CI kiểm tra code, CD đưa bản đã kiểm tra lên server.

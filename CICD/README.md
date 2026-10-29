@@ -50,11 +50,13 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 |---|---|---|
 | Workflow CI | Tab Actions | Java CI #17 xanh trên commit `11f5f05` (53s) |
 | Workflow CD | Tab Actions | Java CD #11 tự chạy sau CI, đăng nhập bằng SSH key, xanh (1m34s) |
-| Container | `docker compose ps` | _chưa cập nhật_ |
-| Log app | `docker compose logs --tail=30 app` | _chưa cập nhật_ |
-| Response | `curl -i http://localhost:18096/` | _chưa cập nhật_ |
+| Container | `docker compose ps` | `net-app-1` chạy đúng image tag `11f5f05…`, Up; db, monitoring không bị khởi động lại |
+| Log app | `docker compose logs --tail=30 app` | `Started NetApplication in 3.117 seconds`, kết nối DB thành công, không có ERROR |
+| Response | `curl -i http://localhost:18096/` | `HTTP/1.1 302` chuyển về trang chủ |
 
 ![CI/CD chạy xanh bằng SSH key](minh_chung/MC-05_ci_cd_xanh_bang_ssh_key.png)
+
+![docker compose ps và log app](minh_chung/MC-06_compose_ps_logs.png)
 
 ## Sự cố ghi nhận
 
@@ -62,10 +64,11 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 |---|---|---|---|
 | S1 | CI fail: test Spring context cần database, runner không có SQL Server | Thêm SQL Server làm service container trong `ci.yml`, có healthcheck | Đã sửa |
 | S2 | CD #4, #5 fail ở bước SSH | Tạm dùng mật khẩu, sau đó tạo key ed25519 riêng cho Actions, kiểm tra `sshd -T`, chuyển về key | Đã sửa |
+| S3 | Container cũ `net-web-1` (tạo 4 tuần trước, không còn trong compose) vẫn chạy và chỉ "Up 21 seconds", nghi restart liên tục, tốn RAM | Kiểm tra `RestartCount` và log, xóa bằng `--remove-orphans` | Chưa xử lý |
 
 ## Còn dang dở
 
-Ảnh `docker compose ps/logs`, `curl` trên server và trang Secrets; xóa Secret `SSH_PASSWORD` không còn dùng; Bài 2 (checklist sau deploy), Bài 3 (script health-check), Bài 4–5 (Kubernetes).
+Ảnh trang Secrets; xử lý container cũ `net-web-1`; xóa Secret `SSH_PASSWORD` không còn dùng; Bài 2 (checklist sau deploy), Bài 3 (script health-check), Bài 4–5 (Kubernetes).
 
 ## Hồ sơ
 
@@ -74,7 +77,7 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 | [BÀI TẬP VỀ NHÀ_CICD_K8S.pdf](<BÀI TẬP VỀ NHÀ_CICD_K8S.pdf>) | Đề bài 5 bài CI/CD và Kubernetes |
 | [bai1-cicd-summary.txt](bai1-cicd-summary.txt) | Tóm tắt Bài 1 |
 | [cau_hinh/](cau_hinh/) | `ci.yml`, `cd.yml` đang chạy trên repo FASTSHOP |
-| [minh_chung/](minh_chung/) | Ảnh `MC-01` đến `MC-05`: lần chạy Actions, tạo SSH key, cấu hình `sshd` |
+| [minh_chung/](minh_chung/) | Ảnh `MC-01` đến `MC-07`: lần chạy Actions, tạo SSH key, cấu hình `sshd`, `docker compose ps/logs`, `curl` |
 | [bai2-post-deploy-check.txt](bai2-post-deploy-check.txt) | Checklist kiểm tra sau deploy |
 | [bai3-healthcheck-note.txt](bai3-healthcheck-note.txt) | Ghi chú script health-check |
 | [devops-cicd-demo/](devops-cicd-demo/) | Repo mẫu nginx dùng để thử luồng ban đầu, kèm `health-check.sh` |
