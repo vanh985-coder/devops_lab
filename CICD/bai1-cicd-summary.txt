@@ -1,40 +1,65 @@
 BÀI 1 - DỰNG LUỒNG CI/CD CƠ BẢN CHO APP DOCKER
 Họ tên: Trần Đức Việt Anh
 
-[Các mục có dấu <...> là chỗ phải điền sau khi làm thật trên server, rồi xóa dấu <>]
+[Các mục có dấu <...> là chỗ phải điền sau khi chạy thật, rồi xóa dấu <>]
 
 1. Repo tên gì
-- Tên repo: devops-cicd-demo
-- Link: <https://github.com/.../devops-cicd-demo>
-- Nội dung: app web tĩnh chạy bằng nginx trong Docker Compose, có endpoint /health.
-  Gồm docker-compose.yml, nginx.conf, index.html, .github/workflows/deploy.yml.
+- Tên repo: san_thuong_mai_devops_course
+- Link: https://github.com/vanh985-coder/san_thuong_mai_devops_course
+- Nội dung: app web Java Spring Boot (FASTSHOP, thư mục FASTSHOP/net) chạy bằng Docker Compose
+  trên server, gồm: app, SQL Server (db), db-init (tạo dữ liệu ban đầu), Prometheus, Grafana,
+  node-exporter, cAdvisor.
+- App đã chạy sẵn trên server trước khi làm bài, em chỉ bổ sung luồng CI/CD.
 
 2. Workflow làm gì
-- File: .github/workflows/deploy.yml, tên "Deploy to server".
-- Chạy khi push lên nhánh main (và có thể chạy tay bằng workflow_dispatch).
-- Dùng appleboy/ssh-action để SSH vào server bằng private key lưu trong GitHub Secrets.
+Em chia thành 2 workflow:
+
+* ci.yml ("Java CI") - kiểm tra code
+  - Chạy khi push hoặc mở pull request vào nhánh dev, main.
+  - Dev đẩy code lên GitHub -> GitHub Actions lấy source code về máy ảo Ubuntu
+    -> cài Java 17 (có cache Maven) -> chạy ./mvnw clean verify để build và chạy test.
+
+* cd.yml ("Java CD") - triển khai
+  - Chỉ chạy khi Java CI chạy XONG và THÀNH CÔNG trên nhánh main (workflow_run).
+    Nếu test fail thì không deploy.
+  - Checkout đúng commit vừa test -> build Docker image -> push image lên GHCR
+    (tag bằng commit SHA) -> SSH vào server bằng key -> pull image mới về
+    -> chạy lại service app bằng docker compose -> kiểm tra container và curl app.
+
 - Secrets đã tạo: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY (private key không nằm trong repo).
+- Public key nằm trong ~/.ssh/authorized_keys trên server.
+- Server đã docker login ghcr.io bằng token quyền read:packages để pull được image private.
 
 3. Pipeline chạy các bước nào
   Bước 1: Dev push commit lên main.
-  Bước 2: GitHub Actions khởi động job "deploy" trên runner ubuntu-latest.
-  Bước 3: Runner SSH vào server bằng key (public key nằm trong ~/.ssh/authorized_keys).
-  Bước 4: Trên server: cd /opt/cicd-demo, git pull origin main.
-  Bước 5: docker compose up -d --build để cập nhật container.
-  Bước 6: docker compose ps, rồi curl -fsS http://localhost:8080/health.
-          Nếu health không trả 200 thì lệnh lỗi, pipeline đỏ.
+  Bước 2: Java CI: checkout -> setup Java 17 -> mvnw clean verify (build + test).
+  Bước 3: CI xanh -> Java CD khởi động.
+  Bước 4: Build image từ FASTSHOP/net/Dockerfile, push lên ghcr.io/vanh985-coder/san_thuong_mai_devops_course:<commit SHA>.
+  Bước 5: SSH vào server, cd vào thư mục FASTSHOP/net, ghi IMAGE_NAME và IMAGE_TAG vào .env.
+  Bước 6: docker compose pull app -> docker compose up -d --no-deps app
+          (chỉ khởi động lại app, không đụng database) -> docker image prune -f.
+  Bước 7: docker compose ps, rồi curl http://localhost:18096/ (thử lại nhiều lần vì Java khởi động chậm).
+          Nếu app không trả lời thì lệnh lỗi, pipeline đỏ (có set -e).
 
 4. Deploy thành công hay chưa
-- <Thành công / chưa. Ghi rõ lần chạy nào, commit nào, đã sửa lỗi gì nếu có.>
+- <Thành công / chưa. Ghi rõ commit nào, link lần chạy Actions, đã sửa lỗi gì nếu có.>
 
-5. Đã verify bằng những lệnh nào
-- docker compose ps        -> <container cicd-demo-web trạng thái Up (healthy)>
-- docker compose logs --tail=30   -> <log nginx nhận request, không có lỗi>
-- curl -i http://localhost:8080/       -> <HTTP 200, thấy nội dung phiên bản mới>
-- curl -i http://localhost:8080/health -> <HTTP 200, body "ok">
+5. Đã verify bằng những lệnh nào (chạy trên server, trong thư mục FASTSHOP/net)
+- docker compose ps                    -> <app trạng thái Up, đúng image tag = commit SHA>
+- docker compose logs --tail=30 app    -> <Spring Boot "Started ... in ... seconds", không lỗi>
+- curl -i http://localhost:18096/      -> <HTTP 200 hoặc 302>
+- grep IMAGE_TAG .env                  -> <đúng SHA của commit vừa push>
 
 6. Em rút ra được gì
-- <Ví dụ: key SSH chỉ cần quyền đúng; script_stop giúp pipeline đỏ khi lệnh trên server lỗi; ...>
+- CI và CD là 2 việc khác nhau: CI kiểm tra code, CD đưa bản đã kiểm tra lên server.
+  CD phải chạy sau CI xanh, nếu không sẽ deploy cả bản test fail.
+- Build image trên GitHub Actions rồi đẩy lên registry thì server không tốn tài nguyên build,
+  và tag theo commit SHA giúp biết đang chạy bản nào, rollback bằng cách chạy lại tag cũ.
+  Thực tế doanh nghiệp thường làm theo cách này.
+- GHCR mặc định private nên server phải đăng nhập mới pull được.
+- Biến export trong phiên SSH sẽ mất, nên phải ghi vào .env để chạy docker compose bằng tay sau này.
+- Pipeline xanh chưa chắc app chạy được, nên phải có bước health check ở cuối.
+- <Thêm lỗi thực tế em gặp khi làm và cách sửa>
 
-Ảnh đính kèm: repo, file workflow, trang Secrets, log workflow xanh,
+Ảnh đính kèm: repo, file ci.yml và cd.yml, trang Secrets, log Java CI và Java CD xanh,
 docker compose ps, docker compose logs, curl.

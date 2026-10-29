@@ -51,11 +51,11 @@ Dev push ──> GitHub ──> Java CI (build + test bằng Maven)
 | Workflow CD | Tab Actions | _chưa cập nhật_ |
 | Container | `docker compose ps` | _chưa cập nhật_ |
 | Log app | `docker compose logs --tail=30 app` | _chưa cập nhật_ |
-| Response | `curl -i http://localhost:<cổng>/` | _chưa cập nhật_ |
+| Response | `curl -i http://localhost:18096/` | _chưa cập nhật_ |
 
 ## Còn dang dở
 
-Ảnh minh chứng (repo, file workflow, Secrets, log Actions xanh, `docker compose ps/logs`, `curl`), cập nhật `bai1-cicd-summary.txt` theo luồng GHCR, Bài 2 (checklist sau deploy), Bài 3 (script health-check), Bài 4–5 (Kubernetes).
+Ảnh minh chứng (repo, file workflow, Secrets, log Actions xanh, `docker compose ps/logs`, `curl`), điền kết quả thật vào `bai1-cicd-summary.txt`, Bài 2 (checklist sau deploy), Bài 3 (script health-check), Bài 4–5 (Kubernetes).
 
 ## Hồ sơ
 
