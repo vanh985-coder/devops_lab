@@ -1,0 +1,41 @@
+CHECKLIST DEPLOY THỦ CÔNG - APP DOCKER TRÊN SERVER
+Họ tên: Trần Đức Việt Anh
+
+1. KIỂM TRA SOURCE CODE
+git status
+   -> Xem đang ở nhánh nào và có sửa dở gì trên server không
+git fetch origin
+   -> Lấy thông tin từ remote
+git log HEAD..origin/main --oneline
+   -> Xem có commit mới nào trên remote chưa kéo về
+git diff HEAD origin/main --stat
+   -> Xem file nào sẽ thay đổi
+git pull origin main
+   -> Nếu có commit mới và working tree sạch thì kéo về
+git log -1 --oneline
+   -> Ghi lại commit đang chạy, để rollback khi lỗi
+
+2. BUILD IMAGE + CHẠY LẠI STACK
+docker compose up -d --build
+
+3. KIỂM TRA CONTAINER
+Xem các container đã chạy hết chưa, có map đúng với port dịch vụ trong mạng không
+docker compose ps
+
+4. KIỂM TRA LOG CỦA TỪNG SERVICE NẾU LỖI
+Ví dụ lỗi ở container app:
+docker compose logs app
+Ví dụ lỗi ở database:
+docker compose logs database
+
+5. KIỂM TRA RESPONSE
+Kiểm tra có gửi được request đến dịch vụ đó không.
+Ví dụ dịch vụ tên app được map với port 18000 của host:
+curl -I http://localhost:18000
+
+6. KIỂM TRA NGINX
+Kiểm tra file cấu hình nginx đã viết đúng cú pháp chưa và dịch vụ nginx đã chạy chưa
+systemctl restart nginx
+   -> Restart lại nginx để chạy file cấu hình mới nhất
+nginx -t
+systemctl status nginx
