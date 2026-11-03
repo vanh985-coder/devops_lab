@@ -1,0 +1,37 @@
+BÀI 2 - VAI TRÒ CLOUDFLARE TRONG HỆ THỐNG
+Họ tên: Trần Đức Việt Anh
+Hệ thống: Chợ PTITers - choptiters.id.vn, api.choptiters.id.vn
+
+1. CLOUDFLARE ĐỨNG Ở ĐÂU
+- Cloudflare nằm GIỮA người dùng và server (origin).
+- Luồng: User/Browser -> Cloudflare -> Nginx (Ubuntu server) -> Container
+  (frontend 127.0.0.1:18080, api 127.0.0.1:18000).
+- Khi bản ghi DNS bật proxy (đám mây cam), DNS trả về IP của Cloudflare,
+  không phải IP server.
+
+2. CLOUDFLARE LÀM GÌ
+- DNS: quản lý bản ghi choptiters.id.vn, www, api.
+- Reverse proxy: nhận request thay server rồi chuyển về origin.
+- SSL/TLS: mã hóa HTTPS user <-> Cloudflare <-> origin.
+- CDN/cache: cache file tĩnh của frontend, giảm tải cho server.
+- Chống DDoS, WAF, rate limit: chặn tấn công trước khi tới server.
+- Ẩn origin IP: bên ngoài chỉ thấy IP của Cloudflare.
+
+3. VÌ SAO KHÔNG NÊN LỘ ORIGIN IP
+- Kẻ tấn công biết IP thật sẽ đi vòng qua Cloudflare, gọi thẳng vào server.
+- Khi đó mất hết lớp bảo vệ: DDoS, WAF, rate limit, bot protection.
+- Có thể scan port/dịch vụ (SSH, port dev/test), brute force, spam API.
+- Lộ thông tin hạ tầng; IP đã lộ thì phải đổi IP mới, rất tốn công.
+- IP thường bị lộ do: bản ghi DNS only, lịch sử DNS cũ, subdomain quên bật
+  proxy, email gửi từ server, tra cứu chứng chỉ SSL.
+
+4. BIỆN PHÁP
+- Đã có: container chỉ bind 127.0.0.1; Postgres/Redis không mở ra host;
+  Nginx ép HTTP -> HTTPS (301).
+- Đề xuất: ufw chỉ cho 80/443 từ dải IP Cloudflare; SSL mode Full (strict);
+  Authenticated Origin Pulls; mọi bản ghi đều bật proxy; không gửi mail
+  trực tiếp từ IP server.
+
+KẾT LUẬN: Cloudflare là lớp edge trước server (DNS + reverse proxy), giúp mã
+hóa, cache, chống DDoS và giấu origin IP. Giữ kín origin IP và chỉ nhận
+traffic từ Cloudflare thì các lớp bảo vệ mới có hiệu lực.

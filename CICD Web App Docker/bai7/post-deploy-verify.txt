@@ -1,0 +1,19 @@
+CHECKLIST VERIFY SAU DEPLOY
+Họ tên: Trần Đức Việt Anh
+
+1. KIỂM TRA CONTAINER
+docker compose ps
+
+2. KIỂM TRA LOG
+docker compose logs --tail 50
+
+3. KIỂM TRA PORT
+ss -tuln
+
+4. KIỂM TRA APP RESPONSE BẰNG CURL
+curl -I https://vietanhhpts123.top
+curl -I http://localhost:18096
+
+5. KIỂM TRA NGINX ROUTE
+nginx -t
+systemctl status nginx
